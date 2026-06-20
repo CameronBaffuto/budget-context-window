@@ -44,6 +44,15 @@ struct BudgetCalculatorTests {
         #expect(BudgetUsageLevel(percentUsed: 1.25) == .red)
     }
 
+    @Test("Preserves cents when formatting money")
+    func preservesCentsWhenFormattingMoney() throws {
+        let cents = try #require(CurrencyFormatter.cents(from: "23.10"))
+
+        #expect(cents == 2_310)
+        #expect(CurrencyFormatter.decimalText(for: cents) == "23.10")
+        #expect(CurrencyFormatter.dollarsText(for: cents).contains("23.10"))
+    }
+
     @Test("Detects current calendar month dates")
     func detectsCurrentCalendarMonthDates() throws {
         let calendar = Calendar(identifier: .gregorian)

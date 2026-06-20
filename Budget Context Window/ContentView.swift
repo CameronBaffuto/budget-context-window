@@ -14,6 +14,7 @@ struct ContentView: View {
     @Query(sort: \BudgetSettings.createdAt) private var settings: [BudgetSettings]
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
     @Query(sort: \FixedCost.createdAt) private var fixedCosts: [FixedCost]
+    @Query(sort: \BudgetMonthSnapshot.monthStart, order: .reverse) private var monthSnapshots: [BudgetMonthSnapshot]
 
     @State private var presentedSheet: SheetDestination?
 
@@ -57,6 +58,10 @@ struct ContentView: View {
                             deleteExpense(expense)
                         }
                     )
+
+                    MonthHistoryListView(snapshots: monthSnapshots) { snapshot in
+                        presentedSheet = .monthDetail(snapshot)
+                    }
                 }
                 .padding()
             }
@@ -83,13 +88,17 @@ struct ContentView: View {
                     ExpenseEditorView(expense: expense)
                 case .settings:
                     SettingsView()
+                case .monthDetail(let snapshot):
+                    MonthHistoryDetailView(snapshot: snapshot)
                 }
             }
             .onAppear {
                 ensureSettings()
+                updateCurrentMonthSnapshot(summary)
                 BudgetWidgetSnapshotStore.write(summary)
             }
             .onChange(of: summary) { _, newSummary in
+                updateCurrentMonthSnapshot(newSummary)
                 BudgetWidgetSnapshotStore.write(newSummary)
             }
         }
@@ -108,6 +117,18 @@ struct ContentView: View {
         modelContext.delete(expense)
         try? modelContext.save()
     }
+
+    private func updateCurrentMonthSnapshot(_ summary: BudgetSummary) {
+        let monthStart = monthWindow.interval.start
+
+        if let existingSnapshot = monthSnapshots.first(where: { $0.monthStart == monthStart }) {
+            existingSnapshot.update(with: summary)
+        } else {
+            modelContext.insert(BudgetMonthSnapshot(monthStart: monthStart, summary: summary))
+        }
+
+        try? modelContext.save()
+    }
 }
 
 #Preview {
@@ -115,7 +136,8 @@ struct ContentView: View {
         .modelContainer(for: [
             BudgetSettings.self,
             Expense.self,
-            FixedCost.self
+            FixedCost.self,
+            BudgetMonthSnapshot.self
         ], inMemory: true)
 }
 
@@ -123,6 +145,7 @@ private enum SheetDestination: Identifiable {
     case addExpense
     case editExpense(Expense)
     case settings
+    case monthDetail(BudgetMonthSnapshot)
 
     var id: String {
         switch self {
@@ -132,6 +155,8 @@ private enum SheetDestination: Identifiable {
             "editExpense-\(expense.persistentModelID)"
         case .settings:
             "settings"
+        case .monthDetail(let snapshot):
+            "monthDetail-\(snapshot.persistentModelID)"
         }
     }
 }

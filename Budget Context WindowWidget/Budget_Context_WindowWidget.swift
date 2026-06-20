@@ -191,7 +191,7 @@ struct BudgetWidgetEntryView: View {
 
     private func currencyText(for cents: Int) -> String {
         (Double(cents) / 100.0)
-            .formatted(.currency(code: Locale.current.currency?.identifier ?? "USD").precision(.fractionLength(0 ... 2)))
+            .formatted(.currency(code: Locale.current.currency?.identifier ?? "USD").precision(.fractionLength(2)))
     }
 }
 

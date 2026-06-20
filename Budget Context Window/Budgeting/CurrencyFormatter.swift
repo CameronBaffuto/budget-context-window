@@ -5,12 +5,12 @@ enum CurrencyFormatter {
 
     static func dollarsText(for cents: Int) -> String {
         (Double(cents) / 100.0)
-            .formatted(dollars.precision(.fractionLength(0 ... 2)))
+            .formatted(dollars.precision(.fractionLength(2)))
     }
 
     static func decimalText(for cents: Int) -> String {
         let value = Double(cents) / 100.0
-        return value.formatted(.number.precision(.fractionLength(0 ... 2)))
+        return value.formatted(.number.precision(.fractionLength(2)))
     }
 
     static func cents(from input: String) -> Int? {
@@ -20,6 +20,14 @@ enum CurrencyFormatter {
         }
 
         let cents = value * 100
-        return NSDecimalNumber(decimal: cents).rounding(accordingToBehavior: nil).intValue
+        let rounding = NSDecimalNumberHandler(
+            roundingMode: .plain,
+            scale: 0,
+            raiseOnExactness: false,
+            raiseOnOverflow: false,
+            raiseOnUnderflow: false,
+            raiseOnDivideByZero: false
+        )
+        return NSDecimalNumber(decimal: cents).rounding(accordingToBehavior: rounding).intValue
     }
 }
