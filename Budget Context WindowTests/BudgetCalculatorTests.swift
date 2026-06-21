@@ -69,7 +69,7 @@ struct BudgetCalculatorTests {
             try context.save()
         }
 
-        let currentSchema = Schema(versionedSchema: BudgetDataSchemaV4.self)
+        let currentSchema = Schema(versionedSchema: BudgetDataSchemaV5.self)
         let currentConfiguration = ModelConfiguration(schema: currentSchema, url: storeURL)
         let currentContainer = try ModelContainer(
             for: currentSchema,
@@ -91,6 +91,7 @@ struct BudgetCalculatorTests {
         #expect(fixedCosts.first?.name == "Mortgage")
         #expect(fixedCosts.first?.amountCents == 100_000)
         #expect(fixedCosts.first?.budgetWindowID == BudgetWindow.defaultWindowID)
+        #expect(fixedCosts.first?.categoryName == "")
 
         try? FileManager.default.removeItem(at: storeURL)
         try? FileManager.default.removeItem(at: storeURL.appendingPathExtension("shm"))

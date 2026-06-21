@@ -12,6 +12,7 @@ enum ExpenseCategoryStore {
     static func ensureDefaultsIfNeeded(
         categories: [ExpenseCategory],
         expenses: [Expense],
+        fixedCosts: [FixedCost],
         budgetWindowID: String,
         modelContext: ModelContext
     ) throws {
@@ -23,8 +24,11 @@ enum ExpenseCategoryStore {
         let expenseCategories = expenses
             .filter { $0.budgetWindowID == budgetWindowID }
             .map(\.categoryName)
+        let fixedCostCategories = fixedCosts
+            .filter { $0.budgetWindowID == budgetWindowID }
+            .map(\.categoryName)
         let categoryNames = ExpenseCategoryCatalog.mergedCategories(
-            ExpenseCategoryCatalog.appleWalletCategories + expenseCategories
+            ExpenseCategoryCatalog.appleWalletCategories + expenseCategories + fixedCostCategories
         )
 
         insertMissingCategories(
@@ -63,6 +67,7 @@ enum ExpenseCategoryStore {
         _ category: ExpenseCategory,
         to newName: String,
         expenses: [Expense],
+        fixedCosts: [FixedCost],
         modelContext: ModelContext
     ) throws {
         let trimmedName = newName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -76,6 +81,10 @@ enum ExpenseCategoryStore {
 
         for expense in expenses where expense.budgetWindowID == category.budgetWindowID && expense.categoryName == oldName {
             expense.categoryName = trimmedName
+        }
+
+        for fixedCost in fixedCosts where fixedCost.budgetWindowID == category.budgetWindowID && fixedCost.categoryName == oldName {
+            fixedCost.categoryName = trimmedName
         }
 
         try modelContext.save()

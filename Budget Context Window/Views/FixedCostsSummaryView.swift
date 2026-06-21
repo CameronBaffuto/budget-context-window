@@ -34,8 +34,18 @@ struct FixedCostsSummaryView: View {
             } else {
                 ForEach(enabledFixedCosts) { fixedCost in
                     HStack {
-                        Text(fixedCost.name)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(fixedCost.name)
+
+                            if !fixedCost.categoryName.isEmpty {
+                                Text(fixedCost.categoryName)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+
                         Spacer()
+
                         Text(CurrencyFormatter.dollarsText(for: fixedCost.amountCents))
                             .foregroundStyle(.secondary)
                     }

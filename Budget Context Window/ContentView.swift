@@ -175,6 +175,7 @@ struct ContentView: View {
         try? ExpenseCategoryStore.ensureDefaultsIfNeeded(
             categories: categories,
             expenses: expenses,
+            fixedCosts: fixedCosts,
             budgetWindowID: activeWindowID,
             modelContext: modelContext
         )

@@ -7,6 +7,7 @@ struct ExpenseCategoryEditorView: View {
 
     @Query(sort: \ExpenseCategory.name) private var categories: [ExpenseCategory]
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
+    @Query(sort: \FixedCost.createdAt) private var fixedCosts: [FixedCost]
 
     @State private var categoryName: String
     @State private var showsValidationError = false
@@ -63,6 +64,7 @@ struct ExpenseCategoryEditorView: View {
                     category,
                     to: trimmedName,
                     expenses: expenses,
+                    fixedCosts: fixedCosts,
                     modelContext: modelContext
                 )
             } else {
@@ -87,5 +89,5 @@ struct ExpenseCategoryEditorView: View {
 
 #Preview {
     ExpenseCategoryEditorView()
-        .modelContainer(for: [BudgetWindow.self, BudgetSettings.self, Expense.self, ExpenseCategory.self], inMemory: true)
+        .modelContainer(for: [BudgetWindow.self, BudgetSettings.self, Expense.self, FixedCost.self, ExpenseCategory.self], inMemory: true)
 }

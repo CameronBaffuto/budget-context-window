@@ -11,19 +11,16 @@ struct SettingsView: View {
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
     @Query(sort: \ExpenseCategory.name) private var categories: [ExpenseCategory]
 
-    @State private var budgetText = ""
-    @State private var selectedFixedCost: FixedCost?
-    @State private var selectedCategory: ExpenseCategory?
-    @State private var isAddingFixedCost = false
-    @State private var isAddingCategory = false
-    @State private var showsValidationError = false
-
     private var activeWindow: BudgetWindow? {
         BudgetWindowStore.activeWindow(from: budgetWindows)
     }
 
     private var activeWindowID: String {
         BudgetWindowStore.activeWindowID(from: budgetWindows)
+    }
+
+    private var monthlyBudgetCents: Int {
+        activeWindow?.monthlyBudgetCents ?? settings.first?.monthlyBudgetCents ?? BudgetEngine.defaultMonthlyBudgetCents
     }
 
     private var fixedCostsForActiveWindow: [FixedCost] {
@@ -34,196 +31,60 @@ struct SettingsView: View {
         ExpenseCategoryStore.activeCategories(categories, budgetWindowID: activeWindowID)
     }
 
-    private var monthlyBudgetCents: Int {
-        activeWindow?.monthlyBudgetCents ?? settings.first?.monthlyBudgetCents ?? BudgetEngine.defaultMonthlyBudgetCents
-    }
-
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Monthly Budget") {
-                    TextField("Budget", text: $budgetText)
-                        .keyboardType(.decimalPad)
-                }
-
-                Section("Fixed Costs") {
-                    if fixedCostsForActiveWindow.isEmpty {
-                        ContentUnavailableView(
-                            "No Fixed Costs",
-                            systemImage: "calendar",
-                            description: Text("Add recurring costs that should count every month.")
+            List {
+                Section("Budget") {
+                    NavigationLink(value: SettingsRoute.monthlyBudget) {
+                        SettingsRowView(
+                            title: "Monthly Budget",
+                            subtitle: CurrencyFormatter.dollarsText(for: monthlyBudgetCents),
+                            systemImage: "gauge.with.dots.needle.bottom.50percent"
                         )
-                    } else {
-                        ForEach(fixedCostsForActiveWindow) { fixedCost in
-                            HStack {
-                                Button {
-                                    selectedFixedCost = fixedCost
-                                } label: {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        HStack(spacing: 6) {
-                                            Text(fixedCost.name)
-                                                .foregroundStyle(.primary)
-
-                                            Image(systemName: fixedCost.isEnabled ? "checkmark.circle.fill" : "circle")
-                                                .font(.caption)
-                                                .foregroundStyle(fixedCost.isEnabled ? .green : .secondary)
-                                        }
-
-                                        Text(CurrencyFormatter.dollarsText(for: fixedCost.amountCents))
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                                .buttonStyle(.plain)
-
-                                Spacer()
-
-                                Menu {
-                                    Button("Edit", systemImage: "pencil") {
-                                        selectedFixedCost = fixedCost
-                                    }
-
-                                    Button(fixedCost.isEnabled ? "Disable" : "Enable", systemImage: fixedCost.isEnabled ? "pause.circle" : "checkmark.circle") {
-                                        toggleFixedCost(fixedCost)
-                                    }
-
-                                    Button("Delete", systemImage: "trash", role: .destructive) {
-                                        deleteFixedCost(fixedCost)
-                                    }
-                                } label: {
-                                    Image(systemName: "ellipsis.circle")
-                                        .imageScale(.large)
-                                        .frame(width: 34, height: 34)
-                                        .contentShape(.rect)
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel("Fixed cost actions for \(fixedCost.name)")
-                            }
-                            .swipeActions {
-                                Button("Delete", systemImage: "trash", role: .destructive) {
-                                    deleteFixedCost(fixedCost)
-                                }
-
-                                Button(fixedCost.isEnabled ? "Disable" : "Enable", systemImage: fixedCost.isEnabled ? "pause.circle" : "checkmark.circle") {
-                                    toggleFixedCost(fixedCost)
-                                }
-                                .tint(.blue)
-                            }
-                        }
-                    }
-
-                    Button("Add Fixed Cost", systemImage: "plus") {
-                        isAddingFixedCost = true
                     }
                 }
 
-                Section("Categories") {
-                    if categoriesForActiveWindow.isEmpty {
-                        ContentUnavailableView(
-                            "No Categories",
-                            systemImage: "tag",
-                            description: Text("Add categories for manual expenses.")
+                Section("Spending Setup") {
+                    NavigationLink(value: SettingsRoute.fixedCosts) {
+                        SettingsRowView(
+                            title: "Fixed Costs",
+                            subtitle: "\(fixedCostsForActiveWindow.count) items",
+                            systemImage: "calendar"
                         )
-                    } else {
-                        ForEach(categoriesForActiveWindow) { category in
-                            HStack {
-                                Button {
-                                    selectedCategory = category
-                                } label: {
-                                    Text(category.name)
-                                        .foregroundStyle(.primary)
-                                }
-                                .buttonStyle(.plain)
-
-                                Spacer()
-
-                                Menu {
-                                    Button("Edit", systemImage: "pencil") {
-                                        selectedCategory = category
-                                    }
-
-                                    Button("Delete", systemImage: "trash", role: .destructive) {
-                                        deleteCategory(category)
-                                    }
-                                } label: {
-                                    Image(systemName: "ellipsis.circle")
-                                        .imageScale(.large)
-                                        .frame(width: 34, height: 34)
-                                        .contentShape(.rect)
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel("Category actions for \(category.name)")
-                            }
-                            .swipeActions {
-                                Button("Delete", systemImage: "trash", role: .destructive) {
-                                    deleteCategory(category)
-                                }
-                            }
-                        }
                     }
 
-                    Button("Add Category", systemImage: "plus") {
-                        isAddingCategory = true
+                    NavigationLink(value: SettingsRoute.categories) {
+                        SettingsRowView(
+                            title: "Categories",
+                            subtitle: "\(categoriesForActiveWindow.count) items",
+                            systemImage: "tag"
+                        )
                     }
                 }
             }
             .navigationTitle("Settings")
+            .navigationDestination(for: SettingsRoute.self) { route in
+                switch route {
+                case .monthlyBudget:
+                    MonthlyBudgetSettingsView()
+                case .fixedCosts:
+                    FixedCostSettingsView()
+                case .categories:
+                    CategorySettingsView()
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") {
-                        saveBudget()
+                        dismiss()
                     }
                 }
             }
             .onAppear {
                 ensureDefaultWindow()
                 ensureDefaultCategories()
-                budgetText = CurrencyFormatter.decimalText(for: monthlyBudgetCents)
-            }
-            .sheet(isPresented: $isAddingFixedCost) {
-                FixedCostEditorView(budgetWindowID: activeWindowID)
-            }
-            .sheet(isPresented: $isAddingCategory) {
-                ExpenseCategoryEditorView(budgetWindowID: activeWindowID)
-            }
-            .sheet(item: $selectedFixedCost) { fixedCost in
-                FixedCostEditorView(fixedCost: fixedCost)
-            }
-            .sheet(item: $selectedCategory) { category in
-                ExpenseCategoryEditorView(category: category)
-            }
-            .alert("Check Budget", isPresented: $showsValidationError) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("Enter a monthly budget greater than zero.")
             }
         }
-    }
-
-    private func saveBudget() {
-        guard let budgetCents = CurrencyFormatter.cents(from: budgetText), budgetCents > 0 else {
-            showsValidationError = true
-            return
-        }
-
-        let budgetSettings = settings.first ?? BudgetSettings()
-        budgetSettings.monthlyBudgetCents = budgetCents
-        budgetSettings.updatedAt = .now
-
-        if settings.isEmpty {
-            modelContext.insert(budgetSettings)
-        }
-
-        let budgetWindow = activeWindow ?? BudgetWindow(windowID: BudgetWindow.defaultWindowID)
-        budgetWindow.monthlyBudgetCents = budgetCents
-        budgetWindow.updatedAt = .now
-
-        if activeWindow == nil {
-            modelContext.insert(budgetWindow)
-        }
-
-        try? modelContext.save()
-        dismiss()
     }
 
     private func ensureDefaultWindow() {
@@ -241,24 +102,38 @@ struct SettingsView: View {
         try? ExpenseCategoryStore.ensureDefaultsIfNeeded(
             categories: categories,
             expenses: expenses,
+            fixedCosts: fixedCosts,
             budgetWindowID: activeWindowID,
             modelContext: modelContext
         )
     }
+}
 
-    private func toggleFixedCost(_ fixedCost: FixedCost) {
-        fixedCost.isEnabled.toggle()
-        try? modelContext.save()
-    }
+private enum SettingsRoute: Hashable {
+    case monthlyBudget
+    case fixedCosts
+    case categories
+}
 
-    private func deleteFixedCost(_ fixedCost: FixedCost) {
-        modelContext.delete(fixedCost)
-        try? modelContext.save()
-    }
+private struct SettingsRowView: View {
+    let title: String
+    let subtitle: String
+    let systemImage: String
 
-    private func deleteCategory(_ category: ExpenseCategory) {
-        modelContext.delete(category)
-        try? modelContext.save()
+    var body: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .foregroundStyle(.primary)
+
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        } icon: {
+            Image(systemName: systemImage)
+                .foregroundStyle(.blue)
+        }
     }
 }
 
