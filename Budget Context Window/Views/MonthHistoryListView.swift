@@ -45,7 +45,7 @@ struct MonthHistoryListView: View {
                             VStack(alignment: .trailing, spacing: 4) {
                                 Text(snapshot.percentUsed.formatted(.percent.precision(.fractionLength(0))))
                                     .font(.body.weight(.semibold))
-                                    .foregroundStyle(color(for: snapshot.usageLevel))
+                                    .foregroundStyle(AppTheme.color(for: snapshot.usageLevel))
 
                                 Text(CurrencyFormatter.dollarsText(for: snapshot.remainingCents))
                                     .font(.caption)
@@ -71,14 +71,4 @@ struct MonthHistoryListView: View {
         .background(.background, in: RoundedRectangle(cornerRadius: 8))
     }
 
-    private func color(for level: BudgetUsageLevel) -> Color {
-        switch level {
-        case .green:
-            .green
-        case .yellow:
-            .yellow
-        case .red:
-            .red
-        }
-    }
 }

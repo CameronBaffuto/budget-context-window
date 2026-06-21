@@ -137,7 +137,7 @@ struct BudgetWidgetEntryView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(currencyText(for: entry.snapshot.remainingCents))
                     .font(.headline)
-                    .foregroundStyle(entry.snapshot.isOverBudget ? .red : .primary)
+                    .foregroundStyle(entry.snapshot.isOverBudget ? WidgetTheme.danger : .primary)
                     .minimumScaleFactor(0.75)
 
                 Text("remaining")
@@ -165,7 +165,7 @@ struct BudgetWidgetEntryView: View {
 
                 Text("\(currencyText(for: entry.snapshot.remainingCents)) remaining")
                     .font(.title3.weight(.semibold))
-                    .foregroundStyle(entry.snapshot.isOverBudget ? .red : .primary)
+                    .foregroundStyle(entry.snapshot.isOverBudget ? WidgetTheme.danger : .primary)
                     .minimumScaleFactor(0.75)
 
                 Text("\(currencyText(for: entry.snapshot.usedCents)) used of \(currencyText(for: entry.snapshot.budgetCents))")
@@ -207,14 +207,7 @@ private struct WidgetProgressRingView: View {
     }
 
     private var ringColor: Color {
-        switch BudgetWidgetUsageLevel(percentUsed: percentUsed) {
-        case .green:
-            .green
-        case .yellow:
-            .yellow
-        case .red:
-            .red
-        }
+        WidgetTheme.color(for: BudgetWidgetUsageLevel(percentUsed: percentUsed))
     }
 
     var body: some View {
@@ -242,6 +235,23 @@ private struct WidgetProgressRingView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Budget used")
         .accessibilityValue(percentText)
+    }
+}
+
+private enum WidgetTheme {
+    static let accent = Color(red: 0.0, green: 0.565, blue: 0.318)
+    static let warning = Color(red: 0.78, green: 0.55, blue: 0.08)
+    static let danger = Color.red
+
+    static func color(for usageLevel: BudgetWidgetUsageLevel) -> Color {
+        switch usageLevel {
+        case .green:
+            accent
+        case .yellow:
+            warning
+        case .red:
+            danger
+        }
     }
 }
 

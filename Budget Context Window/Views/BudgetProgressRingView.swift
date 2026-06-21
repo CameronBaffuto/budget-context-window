@@ -12,14 +12,7 @@ struct BudgetProgressRingView: View {
     }
 
     private var ringColor: Color {
-        switch BudgetUsageLevel(percentUsed: percentUsed) {
-        case .green:
-            .green
-        case .yellow:
-            .yellow
-        case .red:
-            .red
-        }
+        AppTheme.color(for: BudgetUsageLevel(percentUsed: percentUsed))
     }
 
     var body: some View {

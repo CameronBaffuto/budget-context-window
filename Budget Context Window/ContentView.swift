@@ -149,6 +149,7 @@ struct ContentView: View {
                 BudgetWidgetSnapshotStore.write(newSummary)
             }
         }
+        .tint(AppTheme.accent)
     }
 
     private func ensureSettings() {

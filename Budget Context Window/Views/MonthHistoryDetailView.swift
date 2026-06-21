@@ -28,7 +28,7 @@ struct MonthHistoryDetailView: View {
 
                             Text("\(CurrencyFormatter.dollarsText(for: snapshot.remainingCents)) remaining")
                                 .font(.title2.weight(.semibold))
-                                .foregroundStyle(snapshot.remainingCents < 0 ? .red : .primary)
+                                .foregroundStyle(snapshot.remainingCents < 0 ? AppTheme.danger : .primary)
 
                             Text("\(CurrencyFormatter.dollarsText(for: snapshot.usedCents)) used of \(CurrencyFormatter.dollarsText(for: snapshot.budgetCents))")
                                 .font(.subheadline)

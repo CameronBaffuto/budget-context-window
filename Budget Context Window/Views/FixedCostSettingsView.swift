@@ -39,7 +39,7 @@ struct FixedCostSettingsView: View {
 
                                     Image(systemName: fixedCost.isEnabled ? "checkmark.circle.fill" : "circle")
                                         .font(.caption)
-                                        .foregroundStyle(fixedCost.isEnabled ? .green : .secondary)
+                                        .foregroundStyle(fixedCost.isEnabled ? AppTheme.accent : .secondary)
                                 }
 
                                 HStack(spacing: 8) {
@@ -86,7 +86,7 @@ struct FixedCostSettingsView: View {
                         Button(fixedCost.isEnabled ? "Disable" : "Enable", systemImage: fixedCost.isEnabled ? "pause.circle" : "checkmark.circle") {
                             toggleFixedCost(fixedCost)
                         }
-                        .tint(.blue)
+                        .tint(AppTheme.accent)
                     }
                 }
             }

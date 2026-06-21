@@ -23,7 +23,7 @@ struct BudgetGaugeView: View {
 
                 Text("\(CurrencyFormatter.dollarsText(for: summary.remainingCents)) remaining")
                     .font(.title2.weight(.semibold))
-                    .foregroundStyle(summary.isOverBudget ? .red : .primary)
+                    .foregroundStyle(summary.isOverBudget ? AppTheme.danger : .primary)
                     .minimumScaleFactor(0.8)
 
                 Text("\(CurrencyFormatter.dollarsText(for: summary.usedCents)) used of \(CurrencyFormatter.dollarsText(for: summary.budgetCents))")

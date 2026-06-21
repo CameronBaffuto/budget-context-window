@@ -86,7 +86,7 @@ struct AppleCardImportReviewView: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isSelected ? .blue : .secondary)
+                    .foregroundStyle(isSelected ? AppTheme.accent : .secondary)
                     .imageScale(.large)
 
                 VStack(alignment: .leading, spacing: 4) {
