@@ -3,6 +3,7 @@ import SwiftData
 
 @Model
 final class BudgetMonthSnapshot {
+    var monthKey: String = ""
     var monthStart: Date
     var monthLabel: String
     var budgetCents: Int
@@ -14,6 +15,7 @@ final class BudgetMonthSnapshot {
     var updatedAt: Date
 
     init(monthStart: Date, summary: BudgetSummary, updatedAt: Date = .now) {
+        self.monthKey = summary.monthKey.isEmpty ? BudgetPeriod.monthKey(for: monthStart) : summary.monthKey
         self.monthStart = monthStart
         self.monthLabel = summary.monthLabel
         self.budgetCents = summary.budgetCents
@@ -26,6 +28,7 @@ final class BudgetMonthSnapshot {
     }
 
     func update(with summary: BudgetSummary, updatedAt: Date = .now) {
+        monthKey = summary.monthKey.isEmpty ? BudgetPeriod.monthKey(for: monthStart) : summary.monthKey
         monthLabel = summary.monthLabel
         budgetCents = summary.budgetCents
         fixedCostCents = summary.fixedCostCents
@@ -42,5 +45,9 @@ final class BudgetMonthSnapshot {
 
     var usageLevel: BudgetUsageLevel {
         BudgetUsageLevel(percentUsed: percentUsed)
+    }
+
+    var stableMonthKey: String {
+        monthKey.isEmpty ? BudgetPeriod.monthKey(for: monthStart) : monthKey
     }
 }

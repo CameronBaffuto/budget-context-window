@@ -19,6 +19,34 @@ struct BudgetCalculatorTests {
         #expect(summary.isOverBudget == false)
     }
 
+    @Test("Builds summaries from settings, expenses, and fixed costs")
+    func buildsSummariesFromModels() throws {
+        let calendar = Calendar(identifier: .gregorian)
+        let periodDate = try #require(calendar.date(from: DateComponents(year: 2026, month: 6, day: 20)))
+        let period = BudgetPeriod(calendar: calendar, date: periodDate)
+        let includedExpenseDate = try #require(calendar.date(from: DateComponents(year: 2026, month: 6, day: 10)))
+        let excludedExpenseDate = try #require(calendar.date(from: DateComponents(year: 2026, month: 7, day: 1)))
+
+        let summary = BudgetEngine.summary(
+            settings: BudgetSettings(monthlyBudgetCents: 500_000),
+            expenses: [
+                Expense(name: "Groceries", amountCents: 10_000, date: includedExpenseDate),
+                Expense(name: "Next month", amountCents: 999_999, date: excludedExpenseDate)
+            ],
+            fixedCosts: [
+                FixedCost(name: "Mortgage", amountCents: 200_000),
+                FixedCost(name: "Disabled", amountCents: 999_999, isEnabled: false)
+            ],
+            period: period
+        )
+
+        #expect(summary.monthKey == "2026-06")
+        #expect(summary.fixedCostCents == 200_000)
+        #expect(summary.manualExpenseCents == 10_000)
+        #expect(summary.usedCents == 210_000)
+        #expect(summary.remainingCents == 290_000)
+    }
+
     @Test("Allows over-budget state")
     func allowsOverBudgetState() {
         let summary = BudgetCalculator.summary(
@@ -63,6 +91,7 @@ struct BudgetCalculatorTests {
         let excluded = try #require(calendar.date(from: DateComponents(year: 2026, month: 7, day: 1)))
 
         #expect(window.label == "June 2026")
+        #expect(window.monthKey == "2026-06")
         #expect(window.contains(included))
         #expect(!window.contains(excluded))
     }

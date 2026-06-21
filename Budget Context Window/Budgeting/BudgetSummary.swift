@@ -1,6 +1,7 @@
 import Foundation
 
 struct BudgetSummary: Equatable {
+    let monthKey: String
     let budgetCents: Int
     let fixedCostCents: Int
     let manualExpenseCents: Int
@@ -43,13 +44,15 @@ enum BudgetCalculator {
         budgetCents: Int,
         fixedCostCents: Int,
         manualExpenseCents: Int,
-        monthLabel: String
+        monthLabel: String,
+        monthKey: String = ""
     ) -> BudgetSummary {
         let usedCents = fixedCostCents + manualExpenseCents
         let remainingCents = budgetCents - usedCents
         let percentUsed = budgetCents > 0 ? Double(usedCents) / Double(budgetCents) : 0
 
         return BudgetSummary(
+            monthKey: monthKey,
             budgetCents: budgetCents,
             fixedCostCents: fixedCostCents,
             manualExpenseCents: manualExpenseCents,

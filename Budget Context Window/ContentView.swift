@@ -18,24 +18,20 @@ struct ContentView: View {
 
     @State private var presentedSheet: SheetDestination?
 
-    private var monthWindow: MonthWindow {
-        MonthWindow.current()
+    private var currentPeriod: BudgetPeriod {
+        BudgetPeriod.current()
     }
 
     private var monthlyExpenses: [Expense] {
-        expenses.filter { monthWindow.contains($0.date) }
-    }
-
-    private var enabledFixedCosts: [FixedCost] {
-        fixedCosts.filter(\.isEnabled)
+        BudgetEngine.manualExpenses(expenses, in: currentPeriod)
     }
 
     private var summary: BudgetSummary {
-        BudgetCalculator.summary(
-            budgetCents: settings.first?.monthlyBudgetCents ?? 500_000,
-            fixedCostCents: enabledFixedCosts.reduce(0) { $0 + $1.amountCents },
-            manualExpenseCents: monthlyExpenses.reduce(0) { $0 + $1.amountCents },
-            monthLabel: monthWindow.label
+        BudgetEngine.summary(
+            settings: settings.first,
+            expenses: expenses,
+            fixedCosts: fixedCosts,
+            period: currentPeriod
         )
     }
 
@@ -94,11 +90,11 @@ struct ContentView: View {
             }
             .onAppear {
                 ensureSettings()
-                updateCurrentMonthSnapshot(summary)
+                upsertCurrentMonthSnapshot(summary)
                 BudgetWidgetSnapshotStore.write(summary)
             }
             .onChange(of: summary) { _, newSummary in
-                updateCurrentMonthSnapshot(newSummary)
+                upsertCurrentMonthSnapshot(newSummary)
                 BudgetWidgetSnapshotStore.write(newSummary)
             }
         }
@@ -118,16 +114,13 @@ struct ContentView: View {
         try? modelContext.save()
     }
 
-    private func updateCurrentMonthSnapshot(_ summary: BudgetSummary) {
-        let monthStart = monthWindow.interval.start
-
-        if let existingSnapshot = monthSnapshots.first(where: { $0.monthStart == monthStart }) {
-            existingSnapshot.update(with: summary)
-        } else {
-            modelContext.insert(BudgetMonthSnapshot(monthStart: monthStart, summary: summary))
-        }
-
-        try? modelContext.save()
+    private func upsertCurrentMonthSnapshot(_ summary: BudgetSummary) {
+        try? BudgetSnapshotStore.upsertCurrentMonthSnapshot(
+            summary: summary,
+            period: currentPeriod,
+            snapshots: monthSnapshots,
+            modelContext: modelContext
+        )
     }
 }
 
