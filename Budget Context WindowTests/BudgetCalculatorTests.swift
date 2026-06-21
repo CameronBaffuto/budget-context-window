@@ -19,23 +19,26 @@ struct BudgetCalculatorTests {
         #expect(summary.isOverBudget == false)
     }
 
-    @Test("Builds summaries from settings, expenses, and fixed costs")
+    @Test("Builds summaries from budget window, expenses, and fixed costs")
     func buildsSummariesFromModels() throws {
         let calendar = Calendar(identifier: .gregorian)
         let periodDate = try #require(calendar.date(from: DateComponents(year: 2026, month: 6, day: 20)))
         let period = BudgetPeriod(calendar: calendar, date: periodDate)
         let includedExpenseDate = try #require(calendar.date(from: DateComponents(year: 2026, month: 6, day: 10)))
         let excludedExpenseDate = try #require(calendar.date(from: DateComponents(year: 2026, month: 7, day: 1)))
+        let window = BudgetWindow(windowID: "test-window", monthlyBudgetCents: 500_000)
 
         let summary = BudgetEngine.summary(
-            settings: BudgetSettings(monthlyBudgetCents: 500_000),
+            window: window,
             expenses: [
-                Expense(name: "Groceries", amountCents: 10_000, date: includedExpenseDate),
-                Expense(name: "Next month", amountCents: 999_999, date: excludedExpenseDate)
+                Expense(budgetWindowID: "test-window", name: "Groceries", amountCents: 10_000, date: includedExpenseDate),
+                Expense(budgetWindowID: "test-window", name: "Next month", amountCents: 999_999, date: excludedExpenseDate),
+                Expense(budgetWindowID: "other-window", name: "Other", amountCents: 999_999, date: includedExpenseDate)
             ],
             fixedCosts: [
-                FixedCost(name: "Mortgage", amountCents: 200_000),
-                FixedCost(name: "Disabled", amountCents: 999_999, isEnabled: false)
+                FixedCost(budgetWindowID: "test-window", name: "Mortgage", amountCents: 200_000),
+                FixedCost(budgetWindowID: "test-window", name: "Disabled", amountCents: 999_999, isEnabled: false),
+                FixedCost(budgetWindowID: "other-window", name: "Other", amountCents: 999_999)
             ],
             period: period
         )
@@ -45,6 +48,19 @@ struct BudgetCalculatorTests {
         #expect(summary.manualExpenseCents == 10_000)
         #expect(summary.usedCents == 210_000)
         #expect(summary.remainingCents == 290_000)
+    }
+
+    @Test("Supports custom budget cycle start days")
+    func supportsCustomBudgetCycleStartDays() throws {
+        let calendar = Calendar(identifier: .gregorian)
+        let date = try #require(calendar.date(from: DateComponents(year: 2026, month: 6, day: 10)))
+        let period = BudgetPeriod(calendar: calendar, date: date, startDay: 15)
+        let included = try #require(calendar.date(from: DateComponents(year: 2026, month: 5, day: 20)))
+        let excluded = try #require(calendar.date(from: DateComponents(year: 2026, month: 5, day: 14)))
+
+        #expect(period.monthKey == "2026-05")
+        #expect(period.contains(included))
+        #expect(!period.contains(excluded))
     }
 
     @Test("Allows over-budget state")

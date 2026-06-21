@@ -5,14 +5,28 @@ struct BudgetPeriod: Equatable, Hashable {
     let interval: DateInterval
     let label: String
 
-    static func current(calendar: Calendar = .current, date: Date = .now) -> BudgetPeriod {
-        BudgetPeriod(calendar: calendar, date: date)
+    static func current(calendar: Calendar = .current, date: Date = .now, startDay: Int = 1) -> BudgetPeriod {
+        BudgetPeriod(calendar: calendar, date: date, startDay: startDay)
     }
 
-    init(calendar: Calendar = .current, date: Date) {
-        let interval = calendar.dateInterval(of: .month, for: date) ?? DateInterval(start: date, duration: 0)
+    init(calendar: Calendar = .current, date: Date, startDay: Int = 1) {
+        let startDay = max(1, min(startDay, 28))
+        let monthInterval = calendar.dateInterval(of: .month, for: date) ?? DateInterval(start: date, duration: 0)
+        let currentMonthStart = monthInterval.start
+        let day = calendar.component(.day, from: date)
+
+        let cycleMonthStart = day >= startDay
+            ? currentMonthStart
+            : (calendar.date(byAdding: .month, value: -1, to: currentMonthStart) ?? currentMonthStart)
+
+        let cycleStart = calendar.date(bySetting: .day, value: startDay, of: cycleMonthStart) ?? cycleMonthStart
+        let cycleEnd = calendar.date(byAdding: .month, value: 1, to: cycleStart) ?? cycleStart
+        let interval = DateInterval(start: cycleStart, end: cycleEnd)
+
         self.interval = interval
-        self.label = interval.start.formatted(.dateTime.month(.wide).year())
+        self.label = startDay == 1
+            ? interval.start.formatted(.dateTime.month(.wide).year())
+            : "\(interval.start.formatted(.dateTime.month(.abbreviated).day()))-\(cycleEnd.addingTimeInterval(-1).formatted(.dateTime.month(.abbreviated).day()))"
         self.monthKey = BudgetPeriod.monthKey(for: interval.start, calendar: calendar)
     }
 

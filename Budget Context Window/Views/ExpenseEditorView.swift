@@ -11,9 +11,11 @@ struct ExpenseEditorView: View {
     @State private var showsValidationError = false
 
     private let expense: Expense?
+    private let budgetWindowID: String
 
-    init(expense: Expense? = nil) {
+    init(expense: Expense? = nil, budgetWindowID: String = BudgetWindow.defaultWindowID) {
         self.expense = expense
+        self.budgetWindowID = expense?.budgetWindowID ?? budgetWindowID
         _name = State(initialValue: expense?.name ?? "")
         _amountText = State(initialValue: expense.map { CurrencyFormatter.decimalText(for: $0.amountCents) } ?? "")
         _date = State(initialValue: expense?.date ?? .now)
@@ -68,7 +70,12 @@ struct ExpenseEditorView: View {
             expense.amountCents = amountCents
             expense.date = date
         } else {
-            modelContext.insert(Expense(name: trimmedName, amountCents: amountCents, date: date))
+            modelContext.insert(Expense(
+                budgetWindowID: budgetWindowID,
+                name: trimmedName,
+                amountCents: amountCents,
+                date: date
+            ))
         }
 
         try? modelContext.save()
@@ -78,5 +85,5 @@ struct ExpenseEditorView: View {
 
 #Preview {
     ExpenseEditorView()
-        .modelContainer(for: [BudgetSettings.self, Expense.self, FixedCost.self], inMemory: true)
+        .modelContainer(for: [BudgetWindow.self, BudgetSettings.self, Expense.self, FixedCost.self], inMemory: true)
 }

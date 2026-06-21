@@ -15,6 +15,7 @@ struct Budget_Context_WindowApp: App {
             ContentView()
         }
         .modelContainer(for: [
+            BudgetWindow.self,
             BudgetSettings.self,
             Expense.self,
             FixedCost.self,

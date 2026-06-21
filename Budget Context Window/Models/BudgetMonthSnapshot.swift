@@ -3,6 +3,7 @@ import SwiftData
 
 @Model
 final class BudgetMonthSnapshot {
+    var budgetWindowID: String = BudgetWindow.defaultWindowID
     var monthKey: String = ""
     var monthStart: Date
     var monthLabel: String
@@ -14,7 +15,13 @@ final class BudgetMonthSnapshot {
     var percentUsed: Double
     var updatedAt: Date
 
-    init(monthStart: Date, summary: BudgetSummary, updatedAt: Date = .now) {
+    init(
+        budgetWindowID: String = BudgetWindow.defaultWindowID,
+        monthStart: Date,
+        summary: BudgetSummary,
+        updatedAt: Date = .now
+    ) {
+        self.budgetWindowID = budgetWindowID
         self.monthKey = summary.monthKey.isEmpty ? BudgetPeriod.monthKey(for: monthStart) : summary.monthKey
         self.monthStart = monthStart
         self.monthLabel = summary.monthLabel

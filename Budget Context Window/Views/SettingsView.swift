@@ -6,6 +6,7 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
 
     @Query(sort: \BudgetSettings.createdAt) private var settings: [BudgetSettings]
+    @Query(sort: \BudgetWindow.createdAt) private var budgetWindows: [BudgetWindow]
     @Query(sort: \FixedCost.createdAt) private var fixedCosts: [FixedCost]
 
     @State private var budgetText = ""
@@ -13,8 +14,20 @@ struct SettingsView: View {
     @State private var isAddingFixedCost = false
     @State private var showsValidationError = false
 
+    private var activeWindow: BudgetWindow? {
+        BudgetWindowStore.activeWindow(from: budgetWindows)
+    }
+
+    private var activeWindowID: String {
+        BudgetWindowStore.activeWindowID(from: budgetWindows)
+    }
+
+    private var fixedCostsForActiveWindow: [FixedCost] {
+        BudgetEngine.fixedCosts(fixedCosts, windowID: activeWindowID)
+    }
+
     private var monthlyBudgetCents: Int {
-        settings.first?.monthlyBudgetCents ?? 500_000
+        activeWindow?.monthlyBudgetCents ?? settings.first?.monthlyBudgetCents ?? BudgetEngine.defaultMonthlyBudgetCents
     }
 
     var body: some View {
@@ -26,14 +39,14 @@ struct SettingsView: View {
                 }
 
                 Section("Fixed Costs") {
-                    if fixedCosts.isEmpty {
+                    if fixedCostsForActiveWindow.isEmpty {
                         ContentUnavailableView(
                             "No Fixed Costs",
                             systemImage: "calendar",
                             description: Text("Add recurring costs that should count every month.")
                         )
                     } else {
-                        ForEach(fixedCosts) { fixedCost in
+                        ForEach(fixedCostsForActiveWindow) { fixedCost in
                             HStack {
                                 Button {
                                     selectedFixedCost = fixedCost
@@ -105,10 +118,11 @@ struct SettingsView: View {
                 }
             }
             .onAppear {
+                ensureDefaultWindow()
                 budgetText = CurrencyFormatter.decimalText(for: monthlyBudgetCents)
             }
             .sheet(isPresented: $isAddingFixedCost) {
-                FixedCostEditorView()
+                FixedCostEditorView(budgetWindowID: activeWindowID)
             }
             .sheet(item: $selectedFixedCost) { fixedCost in
                 FixedCostEditorView(fixedCost: fixedCost)
@@ -135,8 +149,27 @@ struct SettingsView: View {
             modelContext.insert(budgetSettings)
         }
 
+        let budgetWindow = activeWindow ?? BudgetWindow(windowID: BudgetWindow.defaultWindowID)
+        budgetWindow.monthlyBudgetCents = budgetCents
+        budgetWindow.updatedAt = .now
+
+        if activeWindow == nil {
+            modelContext.insert(budgetWindow)
+        }
+
         try? modelContext.save()
         dismiss()
+    }
+
+    private func ensureDefaultWindow() {
+        try? BudgetWindowStore.ensureDefaultWindow(
+            settings: settings,
+            windows: budgetWindows,
+            expenses: [],
+            fixedCosts: fixedCosts,
+            snapshots: [],
+            modelContext: modelContext
+        )
     }
 
     private func toggleFixedCost(_ fixedCost: FixedCost) {
@@ -152,5 +185,5 @@ struct SettingsView: View {
 
 #Preview {
     SettingsView()
-        .modelContainer(for: [BudgetSettings.self, Expense.self, FixedCost.self], inMemory: true)
+        .modelContainer(for: [BudgetWindow.self, BudgetSettings.self, Expense.self, FixedCost.self], inMemory: true)
 }

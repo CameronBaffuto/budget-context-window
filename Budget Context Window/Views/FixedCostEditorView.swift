@@ -11,9 +11,11 @@ struct FixedCostEditorView: View {
     @State private var showsValidationError = false
 
     private let fixedCost: FixedCost?
+    private let budgetWindowID: String
 
-    init(fixedCost: FixedCost? = nil) {
+    init(fixedCost: FixedCost? = nil, budgetWindowID: String = BudgetWindow.defaultWindowID) {
         self.fixedCost = fixedCost
+        self.budgetWindowID = fixedCost?.budgetWindowID ?? budgetWindowID
         _name = State(initialValue: fixedCost?.name ?? "")
         _amountText = State(initialValue: fixedCost.map { CurrencyFormatter.decimalText(for: $0.amountCents) } ?? "")
         _isEnabled = State(initialValue: fixedCost?.isEnabled ?? true)
@@ -68,7 +70,12 @@ struct FixedCostEditorView: View {
             fixedCost.amountCents = amountCents
             fixedCost.isEnabled = isEnabled
         } else {
-            modelContext.insert(FixedCost(name: trimmedName, amountCents: amountCents, isEnabled: isEnabled))
+            modelContext.insert(FixedCost(
+                budgetWindowID: budgetWindowID,
+                name: trimmedName,
+                amountCents: amountCents,
+                isEnabled: isEnabled
+            ))
         }
 
         try? modelContext.save()
@@ -78,5 +85,5 @@ struct FixedCostEditorView: View {
 
 #Preview {
     FixedCostEditorView()
-        .modelContainer(for: [BudgetSettings.self, Expense.self, FixedCost.self], inMemory: true)
+        .modelContainer(for: [BudgetWindow.self, BudgetSettings.self, Expense.self, FixedCost.self], inMemory: true)
 }
