@@ -8,10 +8,14 @@ struct SettingsView: View {
     @Query(sort: \BudgetSettings.createdAt) private var settings: [BudgetSettings]
     @Query(sort: \BudgetWindow.createdAt) private var budgetWindows: [BudgetWindow]
     @Query(sort: \FixedCost.createdAt) private var fixedCosts: [FixedCost]
+    @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
+    @Query(sort: \ExpenseCategory.name) private var categories: [ExpenseCategory]
 
     @State private var budgetText = ""
     @State private var selectedFixedCost: FixedCost?
+    @State private var selectedCategory: ExpenseCategory?
     @State private var isAddingFixedCost = false
+    @State private var isAddingCategory = false
     @State private var showsValidationError = false
 
     private var activeWindow: BudgetWindow? {
@@ -24,6 +28,10 @@ struct SettingsView: View {
 
     private var fixedCostsForActiveWindow: [FixedCost] {
         BudgetEngine.fixedCosts(fixedCosts, windowID: activeWindowID)
+    }
+
+    private var categoriesForActiveWindow: [ExpenseCategory] {
+        ExpenseCategoryStore.activeCategories(categories, budgetWindowID: activeWindowID)
     }
 
     private var monthlyBudgetCents: Int {
@@ -108,6 +116,56 @@ struct SettingsView: View {
                         isAddingFixedCost = true
                     }
                 }
+
+                Section("Categories") {
+                    if categoriesForActiveWindow.isEmpty {
+                        ContentUnavailableView(
+                            "No Categories",
+                            systemImage: "tag",
+                            description: Text("Add categories for manual expenses.")
+                        )
+                    } else {
+                        ForEach(categoriesForActiveWindow) { category in
+                            HStack {
+                                Button {
+                                    selectedCategory = category
+                                } label: {
+                                    Text(category.name)
+                                        .foregroundStyle(.primary)
+                                }
+                                .buttonStyle(.plain)
+
+                                Spacer()
+
+                                Menu {
+                                    Button("Edit", systemImage: "pencil") {
+                                        selectedCategory = category
+                                    }
+
+                                    Button("Delete", systemImage: "trash", role: .destructive) {
+                                        deleteCategory(category)
+                                    }
+                                } label: {
+                                    Image(systemName: "ellipsis.circle")
+                                        .imageScale(.large)
+                                        .frame(width: 34, height: 34)
+                                        .contentShape(.rect)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Category actions for \(category.name)")
+                            }
+                            .swipeActions {
+                                Button("Delete", systemImage: "trash", role: .destructive) {
+                                    deleteCategory(category)
+                                }
+                            }
+                        }
+                    }
+
+                    Button("Add Category", systemImage: "plus") {
+                        isAddingCategory = true
+                    }
+                }
             }
             .navigationTitle("Settings")
             .toolbar {
@@ -119,13 +177,20 @@ struct SettingsView: View {
             }
             .onAppear {
                 ensureDefaultWindow()
+                ensureDefaultCategories()
                 budgetText = CurrencyFormatter.decimalText(for: monthlyBudgetCents)
             }
             .sheet(isPresented: $isAddingFixedCost) {
                 FixedCostEditorView(budgetWindowID: activeWindowID)
             }
+            .sheet(isPresented: $isAddingCategory) {
+                ExpenseCategoryEditorView(budgetWindowID: activeWindowID)
+            }
             .sheet(item: $selectedFixedCost) { fixedCost in
                 FixedCostEditorView(fixedCost: fixedCost)
+            }
+            .sheet(item: $selectedCategory) { category in
+                ExpenseCategoryEditorView(category: category)
             }
             .alert("Check Budget", isPresented: $showsValidationError) {
                 Button("OK", role: .cancel) {}
@@ -165,9 +230,18 @@ struct SettingsView: View {
         try? BudgetWindowStore.ensureDefaultWindow(
             settings: settings,
             windows: budgetWindows,
-            expenses: [],
+            expenses: expenses,
             fixedCosts: fixedCosts,
             snapshots: [],
+            modelContext: modelContext
+        )
+    }
+
+    private func ensureDefaultCategories() {
+        try? ExpenseCategoryStore.ensureDefaultsIfNeeded(
+            categories: categories,
+            expenses: expenses,
+            budgetWindowID: activeWindowID,
             modelContext: modelContext
         )
     }
@@ -181,9 +255,14 @@ struct SettingsView: View {
         modelContext.delete(fixedCost)
         try? modelContext.save()
     }
+
+    private func deleteCategory(_ category: ExpenseCategory) {
+        modelContext.delete(category)
+        try? modelContext.save()
+    }
 }
 
 #Preview {
     SettingsView()
-        .modelContainer(for: [BudgetWindow.self, BudgetSettings.self, Expense.self, FixedCost.self], inMemory: true)
+        .modelContainer(for: [BudgetWindow.self, BudgetSettings.self, Expense.self, FixedCost.self, ExpenseCategory.self], inMemory: true)
 }

@@ -248,12 +248,28 @@ enum BudgetDataSchemaV3: VersionedSchema {
     }
 }
 
+enum BudgetDataSchemaV4: VersionedSchema {
+    static var versionIdentifier = Schema.Version(4, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        [
+            BudgetWindow.self,
+            BudgetSettings.self,
+            Expense.self,
+            FixedCost.self,
+            BudgetMonthSnapshot.self,
+            ExpenseCategory.self
+        ]
+    }
+}
+
 enum BudgetDataMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
         [
             BudgetDataSchemaV1.self,
             BudgetDataSchemaV2.self,
-            BudgetDataSchemaV3.self
+            BudgetDataSchemaV3.self,
+            BudgetDataSchemaV4.self
         ]
     }
 
@@ -266,6 +282,10 @@ enum BudgetDataMigrationPlan: SchemaMigrationPlan {
             .lightweight(
                 fromVersion: BudgetDataSchemaV2.self,
                 toVersion: BudgetDataSchemaV3.self
+            ),
+            .lightweight(
+                fromVersion: BudgetDataSchemaV3.self,
+                toVersion: BudgetDataSchemaV4.self
             )
         ]
     }

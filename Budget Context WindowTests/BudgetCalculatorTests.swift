@@ -69,7 +69,7 @@ struct BudgetCalculatorTests {
             try context.save()
         }
 
-        let currentSchema = Schema(versionedSchema: BudgetDataSchemaV3.self)
+        let currentSchema = Schema(versionedSchema: BudgetDataSchemaV4.self)
         let currentConfiguration = ModelConfiguration(schema: currentSchema, url: storeURL)
         let currentContainer = try ModelContainer(
             for: currentSchema,
@@ -115,6 +115,24 @@ struct BudgetCalculatorTests {
         #expect(first.amountCents == 6_863)
         #expect(first.isExpensePurchase)
         #expect(first.importIdentifier.contains(AppleCardTransaction.importSource))
+    }
+
+    @Test("Builds category suggestions from settings categories")
+    func buildsCategorySuggestions() {
+        let suggestions = ExpenseCategoryCatalog.suggestions(
+            from: [
+                ExpenseCategory(budgetWindowID: "default", name: "Food & Drinks"),
+                ExpenseCategory(budgetWindowID: "default", name: "Grocery"),
+                ExpenseCategory(budgetWindowID: "other", name: "Gas")
+            ],
+            budgetWindowID: "default",
+            including: "Grocery"
+        )
+
+        #expect(suggestions.contains("Food & Drinks"))
+        #expect(suggestions.contains("Grocery"))
+        #expect(!suggestions.contains("Gas"))
+        #expect(suggestions.filter { $0 == "Food & Drinks" }.count == 1)
     }
 
     @Test("Supports custom budget cycle start days")

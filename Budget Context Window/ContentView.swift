@@ -17,6 +17,7 @@ struct ContentView: View {
     @Query(sort: \Expense.date, order: .reverse) private var expenses: [Expense]
     @Query(sort: \FixedCost.createdAt) private var fixedCosts: [FixedCost]
     @Query(sort: \BudgetMonthSnapshot.monthStart, order: .reverse) private var monthSnapshots: [BudgetMonthSnapshot]
+    @Query(sort: \ExpenseCategory.name) private var categories: [ExpenseCategory]
 
     @State private var presentedSheet: SheetDestination?
     @State private var importDraft: AppleCardImportDraft?
@@ -138,6 +139,7 @@ struct ContentView: View {
             }
             .onAppear {
                 ensureDefaultWindow()
+                ensureDefaultCategories()
                 ensureSettings()
                 upsertCurrentMonthSnapshot(summary)
                 BudgetWidgetSnapshotStore.write(summary)
@@ -165,6 +167,15 @@ struct ContentView: View {
             expenses: expenses,
             fixedCosts: fixedCosts,
             snapshots: monthSnapshots,
+            modelContext: modelContext
+        )
+    }
+
+    private func ensureDefaultCategories() {
+        try? ExpenseCategoryStore.ensureDefaultsIfNeeded(
+            categories: categories,
+            expenses: expenses,
+            budgetWindowID: activeWindowID,
             modelContext: modelContext
         )
     }
@@ -204,6 +215,13 @@ struct ContentView: View {
     }
 
     private func importTransactions(_ transactions: [AppleCardTransaction]) {
+        ExpenseCategoryStore.insertMissingCategories(
+            transactions.map(\.category),
+            into: categories,
+            budgetWindowID: activeWindowID,
+            modelContext: modelContext
+        )
+
         for transaction in transactions {
             modelContext.insert(Expense(
                 budgetWindowID: activeWindowID,
@@ -237,7 +255,8 @@ struct ContentView: View {
             BudgetSettings.self,
             Expense.self,
             FixedCost.self,
-            BudgetMonthSnapshot.self
+            BudgetMonthSnapshot.self,
+            ExpenseCategory.self
         ], inMemory: true)
 }
 
