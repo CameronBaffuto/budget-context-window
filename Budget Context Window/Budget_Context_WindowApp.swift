@@ -28,6 +28,7 @@ struct Budget_Context_WindowApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .tint(AppTheme.accent)
         }
         .modelContainer(Self.sharedModelContainer)
     }

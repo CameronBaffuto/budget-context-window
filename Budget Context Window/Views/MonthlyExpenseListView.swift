@@ -62,19 +62,25 @@ struct MonthlyExpenseListView: View {
                                 .font(.body.weight(.semibold))
 
                             Menu {
-                                Button("Edit", systemImage: "pencil") {
+                                Button {
                                     onEdit(expense)
+                                } label: {
+                                    Label("Edit", systemImage: "pencil")
                                 }
 
-                                Button("Delete", systemImage: "trash", role: .destructive) {
+                                Button(role: .destructive) {
                                     onDelete(expense)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
                                 }
                             } label: {
                                 Image(systemName: "ellipsis.circle")
                                     .imageScale(.large)
+                                    .foregroundStyle(.secondary)
                                     .frame(width: 34, height: 34)
                                     .contentShape(.rect)
                             }
+                            .tint(.primary)
                             .buttonStyle(.plain)
                             .accessibilityLabel("Expense actions for \(expense.name)")
                         }

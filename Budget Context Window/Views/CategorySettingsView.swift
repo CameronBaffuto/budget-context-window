@@ -40,19 +40,25 @@ struct CategorySettingsView: View {
                         Spacer()
 
                         Menu {
-                            Button("Edit", systemImage: "pencil") {
+                            Button {
                                 selectedCategory = category
+                            } label: {
+                                Label("Edit", systemImage: "pencil")
                             }
 
-                            Button("Delete", systemImage: "trash", role: .destructive) {
+                            Button(role: .destructive) {
                                 deleteCategory(category)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
                             }
                         } label: {
                             Image(systemName: "ellipsis.circle")
                                 .imageScale(.large)
+                                .foregroundStyle(.secondary)
                                 .frame(width: 34, height: 34)
                                 .contentShape(.rect)
                         }
+                        .tint(.primary)
                         .buttonStyle(.plain)
                         .accessibilityLabel("Category actions for \(category.name)")
                     }
