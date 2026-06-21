@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 final class Expense {
-    var budgetWindowID: String
+    var budgetWindowID: String = BudgetWindow.defaultWindowID
     var name: String
     var amountCents: Int
     var date: Date

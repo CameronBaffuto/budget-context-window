@@ -1,0 +1,126 @@
+import Foundation
+import SwiftData
+
+enum BudgetDataSchemaV1: VersionedSchema {
+    static var versionIdentifier = Schema.Version(1, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        [
+            BudgetSettings.self,
+            Expense.self,
+            FixedCost.self,
+            BudgetMonthSnapshot.self
+        ]
+    }
+
+    @Model
+    final class BudgetSettings {
+        var monthlyBudgetCents: Int
+        var createdAt: Date
+        var updatedAt: Date
+
+        init(monthlyBudgetCents: Int = 500_000, createdAt: Date = .now, updatedAt: Date = .now) {
+            self.monthlyBudgetCents = monthlyBudgetCents
+            self.createdAt = createdAt
+            self.updatedAt = updatedAt
+        }
+    }
+
+    @Model
+    final class Expense {
+        var name: String
+        var amountCents: Int
+        var date: Date
+        var createdAt: Date
+
+        init(name: String, amountCents: Int, date: Date = .now, createdAt: Date = .now) {
+            self.name = name
+            self.amountCents = amountCents
+            self.date = date
+            self.createdAt = createdAt
+        }
+    }
+
+    @Model
+    final class FixedCost {
+        var name: String
+        var amountCents: Int
+        var isEnabled: Bool
+        var createdAt: Date
+
+        init(name: String, amountCents: Int, isEnabled: Bool = true, createdAt: Date = .now) {
+            self.name = name
+            self.amountCents = amountCents
+            self.isEnabled = isEnabled
+            self.createdAt = createdAt
+        }
+    }
+
+    @Model
+    final class BudgetMonthSnapshot {
+        var monthKey: String = ""
+        var monthStart: Date
+        var monthLabel: String
+        var budgetCents: Int
+        var fixedCostCents: Int
+        var manualExpenseCents: Int
+        var usedCents: Int
+        var remainingCents: Int
+        var percentUsed: Double
+        var updatedAt: Date
+
+        init(
+            monthStart: Date,
+            monthLabel: String,
+            budgetCents: Int,
+            fixedCostCents: Int,
+            manualExpenseCents: Int,
+            usedCents: Int,
+            remainingCents: Int,
+            percentUsed: Double,
+            updatedAt: Date = .now
+        ) {
+            self.monthStart = monthStart
+            self.monthLabel = monthLabel
+            self.budgetCents = budgetCents
+            self.fixedCostCents = fixedCostCents
+            self.manualExpenseCents = manualExpenseCents
+            self.usedCents = usedCents
+            self.remainingCents = remainingCents
+            self.percentUsed = percentUsed
+            self.updatedAt = updatedAt
+        }
+    }
+}
+
+enum BudgetDataSchemaV2: VersionedSchema {
+    static var versionIdentifier = Schema.Version(2, 0, 0)
+
+    static var models: [any PersistentModel.Type] {
+        [
+            BudgetWindow.self,
+            BudgetSettings.self,
+            Expense.self,
+            FixedCost.self,
+            BudgetMonthSnapshot.self
+        ]
+    }
+}
+
+enum BudgetDataMigrationPlan: SchemaMigrationPlan {
+    static var schemas: [any VersionedSchema.Type] {
+        [
+            BudgetDataSchemaV1.self,
+            BudgetDataSchemaV2.self
+        ]
+    }
+
+    static var stages: [MigrationStage] {
+        [
+            .lightweight(
+                fromVersion: BudgetDataSchemaV1.self,
+                toVersion: BudgetDataSchemaV2.self
+            )
+        ]
+    }
+}

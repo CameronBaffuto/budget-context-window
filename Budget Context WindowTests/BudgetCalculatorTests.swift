@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 import Testing
 @testable import Budget_Context_Window
 
@@ -48,6 +49,50 @@ struct BudgetCalculatorTests {
         #expect(summary.manualExpenseCents == 10_000)
         #expect(summary.usedCents == 210_000)
         #expect(summary.remainingCents == 290_000)
+    }
+
+    @Test("Migrates original SwiftData store to budget window schema")
+    func migratesOriginalStoreToBudgetWindowSchema() throws {
+        let storeURL = FileManager.default.temporaryDirectory
+            .appending(path: UUID().uuidString)
+            .appendingPathExtension("store")
+
+        do {
+            let v1Schema = Schema(versionedSchema: BudgetDataSchemaV1.self)
+            let v1Configuration = ModelConfiguration(schema: v1Schema, url: storeURL)
+            let v1Container = try ModelContainer(for: v1Schema, configurations: [v1Configuration])
+            let context = v1Container.mainContext
+
+            context.insert(BudgetDataSchemaV1.BudgetSettings(monthlyBudgetCents: 123_456))
+            context.insert(BudgetDataSchemaV1.Expense(name: "Groceries", amountCents: 2_310))
+            context.insert(BudgetDataSchemaV1.FixedCost(name: "Mortgage", amountCents: 100_000))
+            try context.save()
+        }
+
+        let v2Schema = Schema(versionedSchema: BudgetDataSchemaV2.self)
+        let v2Configuration = ModelConfiguration(schema: v2Schema, url: storeURL)
+        let v2Container = try ModelContainer(
+            for: v2Schema,
+            migrationPlan: BudgetDataMigrationPlan.self,
+            configurations: [v2Configuration]
+        )
+        let context = v2Container.mainContext
+
+        let settings = try context.fetch(FetchDescriptor<BudgetSettings>())
+        let expenses = try context.fetch(FetchDescriptor<Expense>())
+        let fixedCosts = try context.fetch(FetchDescriptor<FixedCost>())
+
+        #expect(settings.first?.monthlyBudgetCents == 123_456)
+        #expect(expenses.first?.name == "Groceries")
+        #expect(expenses.first?.amountCents == 2_310)
+        #expect(expenses.first?.budgetWindowID == BudgetWindow.defaultWindowID)
+        #expect(fixedCosts.first?.name == "Mortgage")
+        #expect(fixedCosts.first?.amountCents == 100_000)
+        #expect(fixedCosts.first?.budgetWindowID == BudgetWindow.defaultWindowID)
+
+        try? FileManager.default.removeItem(at: storeURL)
+        try? FileManager.default.removeItem(at: storeURL.appendingPathExtension("shm"))
+        try? FileManager.default.removeItem(at: storeURL.appendingPathExtension("wal"))
     }
 
     @Test("Supports custom budget cycle start days")

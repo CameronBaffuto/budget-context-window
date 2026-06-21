@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 final class FixedCost {
-    var budgetWindowID: String
+    var budgetWindowID: String = BudgetWindow.defaultWindowID
     var name: String
     var amountCents: Int
     var isEnabled: Bool

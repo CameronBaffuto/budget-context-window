@@ -10,16 +10,25 @@ import SwiftData
 
 @main
 struct Budget_Context_WindowApp: App {
+    static let sharedModelContainer: ModelContainer = {
+        let schema = Schema(versionedSchema: BudgetDataSchemaV2.self)
+        let modelConfiguration = ModelConfiguration(schema: schema)
+
+        do {
+            return try ModelContainer(
+                for: schema,
+                migrationPlan: BudgetDataMigrationPlan.self,
+                configurations: [modelConfiguration]
+            )
+        } catch {
+            fatalError("Could not create Budget Window model container: \(error)")
+        }
+    }()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [
-            BudgetWindow.self,
-            BudgetSettings.self,
-            Expense.self,
-            FixedCost.self,
-            BudgetMonthSnapshot.self
-        ])
+        .modelContainer(Self.sharedModelContainer)
     }
 }

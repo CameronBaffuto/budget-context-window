@@ -1,4 +1,4 @@
-# Budget Context Window
+# Budget Window
 
 A local-only SwiftUI proof of concept for tracking monthly budget usage like an AI context window.
 
