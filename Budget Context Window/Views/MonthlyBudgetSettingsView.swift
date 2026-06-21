@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct MonthlyBudgetSettingsView: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
     @Query(sort: \BudgetSettings.createdAt) private var settings: [BudgetSettings]
@@ -65,7 +66,12 @@ struct MonthlyBudgetSettingsView: View {
             modelContext.insert(budgetWindow)
         }
 
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+            dismiss()
+        } catch {
+            showsValidationError = true
+        }
     }
 }
 
