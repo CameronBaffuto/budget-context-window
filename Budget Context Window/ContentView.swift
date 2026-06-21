@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -18,6 +19,10 @@ struct ContentView: View {
     @Query(sort: \BudgetMonthSnapshot.monthStart, order: .reverse) private var monthSnapshots: [BudgetMonthSnapshot]
 
     @State private var presentedSheet: SheetDestination?
+    @State private var importDraft: AppleCardImportDraft?
+    @State private var isShowingAppleCardImporter = false
+    @State private var showsImportError = false
+    @State private var importErrorMessage = ""
 
     private var activeWindow: BudgetWindow? {
         BudgetWindowStore.activeWindow(from: budgetWindows)
@@ -88,9 +93,19 @@ struct ContentView: View {
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Add Expense", systemImage: "plus") {
-                        presentedSheet = .addExpense(activeWindowID)
+                    Menu {
+                        Button("Add Expense", systemImage: "plus") {
+                            presentedSheet = .addExpense(activeWindowID)
+                        }
+
+                        Button("Import Apple Card CSV", systemImage: "square.and.arrow.down") {
+                            isShowingAppleCardImporter = true
+                        }
+                    } label: {
+                        Image(systemName: "plus")
+                            .imageScale(.large)
                     }
+                    .accessibilityLabel("Add or import expenses")
                 }
             }
             .sheet(item: $presentedSheet) { sheet in
@@ -104,6 +119,22 @@ struct ContentView: View {
                 case .monthDetail(let snapshot):
                     MonthHistoryDetailView(snapshot: snapshot)
                 }
+            }
+            .sheet(item: $importDraft) { draft in
+                AppleCardImportReviewView(draft: draft) { transactions in
+                    importTransactions(transactions)
+                }
+            }
+            .fileImporter(
+                isPresented: $isShowingAppleCardImporter,
+                allowedContentTypes: [.commaSeparatedText, .plainText],
+                allowsMultipleSelection: false,
+                onCompletion: handleAppleCardImport
+            )
+            .alert("Import Failed", isPresented: $showsImportError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(importErrorMessage)
             }
             .onAppear {
                 ensureDefaultWindow()
@@ -140,6 +171,51 @@ struct ContentView: View {
 
     private func deleteExpense(_ expense: Expense) {
         modelContext.delete(expense)
+        try? modelContext.save()
+    }
+
+    private func handleAppleCardImport(_ result: Result<[URL], Error>) {
+        do {
+            guard let url = try result.get().first else {
+                return
+            }
+
+            let canAccessFile = url.startAccessingSecurityScopedResource()
+            defer {
+                if canAccessFile {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+
+            let data = try Data(contentsOf: url)
+            let transactions = try AppleCardCSVImporter.transactions(from: data)
+            let duplicateIdentifiers = Set(expenses.compactMap { expense in
+                expense.importIdentifier.isEmpty ? nil : expense.importIdentifier
+            })
+
+            importDraft = AppleCardImportDraft(
+                transactions: transactions,
+                duplicateIdentifiers: duplicateIdentifiers
+            )
+        } catch {
+            importErrorMessage = error.localizedDescription
+            showsImportError = true
+        }
+    }
+
+    private func importTransactions(_ transactions: [AppleCardTransaction]) {
+        for transaction in transactions {
+            modelContext.insert(Expense(
+                budgetWindowID: activeWindowID,
+                name: transaction.merchant,
+                amountCents: transaction.amountCents,
+                date: transaction.transactionDate,
+                categoryName: transaction.category,
+                importSource: AppleCardTransaction.importSource,
+                importIdentifier: transaction.importIdentifier
+            ))
+        }
+
         try? modelContext.save()
     }
 

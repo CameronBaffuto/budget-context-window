@@ -11,7 +11,7 @@ import SwiftData
 @main
 struct Budget_Context_WindowApp: App {
     static let sharedModelContainer: ModelContainer = {
-        let schema = Schema(versionedSchema: BudgetDataSchemaV2.self)
+        let schema = Schema(versionedSchema: BudgetDataSchemaV3.self)
         let modelConfiguration = ModelConfiguration(schema: schema)
 
         do {

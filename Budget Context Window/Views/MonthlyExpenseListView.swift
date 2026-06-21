@@ -24,7 +24,18 @@ struct MonthlyExpenseListView: View {
                             Text(expense.name)
                                 .font(.body.weight(.medium))
 
-                            Text(expense.date.formatted(date: .abbreviated, time: .omitted))
+                            HStack(spacing: 8) {
+                                Text(expense.date.formatted(date: .abbreviated, time: .omitted))
+
+                                if !expense.categoryName.isEmpty {
+                                    Text(expense.categoryName)
+                                }
+
+                                if expense.importSource == AppleCardTransaction.importSource {
+                                    Image(systemName: "creditcard")
+                                        .accessibilityLabel("Imported from Apple Card")
+                                }
+                            }
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }

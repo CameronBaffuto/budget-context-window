@@ -51,7 +51,7 @@ struct BudgetCalculatorTests {
         #expect(summary.remainingCents == 290_000)
     }
 
-    @Test("Migrates original SwiftData store to budget window schema")
+    @Test("Migrates original SwiftData store to current schema")
     func migratesOriginalStoreToBudgetWindowSchema() throws {
         let storeURL = FileManager.default.temporaryDirectory
             .appending(path: UUID().uuidString)
@@ -69,14 +69,14 @@ struct BudgetCalculatorTests {
             try context.save()
         }
 
-        let v2Schema = Schema(versionedSchema: BudgetDataSchemaV2.self)
-        let v2Configuration = ModelConfiguration(schema: v2Schema, url: storeURL)
-        let v2Container = try ModelContainer(
-            for: v2Schema,
+        let currentSchema = Schema(versionedSchema: BudgetDataSchemaV3.self)
+        let currentConfiguration = ModelConfiguration(schema: currentSchema, url: storeURL)
+        let currentContainer = try ModelContainer(
+            for: currentSchema,
             migrationPlan: BudgetDataMigrationPlan.self,
-            configurations: [v2Configuration]
+            configurations: [currentConfiguration]
         )
-        let context = v2Container.mainContext
+        let context = currentContainer.mainContext
 
         let settings = try context.fetch(FetchDescriptor<BudgetSettings>())
         let expenses = try context.fetch(FetchDescriptor<Expense>())
@@ -86,6 +86,8 @@ struct BudgetCalculatorTests {
         #expect(expenses.first?.name == "Groceries")
         #expect(expenses.first?.amountCents == 2_310)
         #expect(expenses.first?.budgetWindowID == BudgetWindow.defaultWindowID)
+        #expect(expenses.first?.categoryName == "")
+        #expect(expenses.first?.importIdentifier == "")
         #expect(fixedCosts.first?.name == "Mortgage")
         #expect(fixedCosts.first?.amountCents == 100_000)
         #expect(fixedCosts.first?.budgetWindowID == BudgetWindow.defaultWindowID)
@@ -93,6 +95,26 @@ struct BudgetCalculatorTests {
         try? FileManager.default.removeItem(at: storeURL)
         try? FileManager.default.removeItem(at: storeURL.appendingPathExtension("shm"))
         try? FileManager.default.removeItem(at: storeURL.appendingPathExtension("wal"))
+    }
+
+    @Test("Parses Apple Card CSV transactions")
+    func parsesAppleCardCSVTransactions() throws {
+        let csv = """
+        Transaction Date,Clearing Date,Description,Merchant,Category,Type,Amount (USD),Purchased By
+        06/20/2026,06/21/2026,"WEGMANSYARDLEY 925 VANSANT DR YARDLEY 19067 PA USA","Wegmansyardley","Grocery","Purchase","68.63","Cameron Baffuto"
+        06/19/2026,06/20/2026,"CAFE ""TEST"" 123 MAIN ST","Cafe Test","Restaurants","Purchase","12.30","Cameron Baffuto"
+        """
+
+        let transactions = try AppleCardCSVImporter.transactions(fromCSVText: csv)
+        let first = try #require(transactions.first)
+
+        #expect(transactions.count == 2)
+        #expect(first.merchant == "Wegmansyardley")
+        #expect(first.category == "Grocery")
+        #expect(first.type == "Purchase")
+        #expect(first.amountCents == 6_863)
+        #expect(first.isExpensePurchase)
+        #expect(first.importIdentifier.contains(AppleCardTransaction.importSource))
     }
 
     @Test("Supports custom budget cycle start days")
