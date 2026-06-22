@@ -18,7 +18,7 @@ struct BudgetProgressRingView: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(.secondary.opacity(0.18), lineWidth: lineWidth)
+                .stroke(.white.opacity(0.12), lineWidth: lineWidth)
 
             Circle()
                 .trim(from: 0, to: displayProgress)

@@ -60,22 +60,22 @@ struct FixedCostsSummaryView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Fixed Costs")
                         .font(.headline)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(.white)
 
                     Text("\(enabledFixedCosts.count) recurring")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(AppTheme.mutedText)
                 }
 
                 Spacer()
 
                 Text(CurrencyFormatter.dollarsText(for: enabledTotal))
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(AppTheme.mutedText)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(.background, in: RoundedRectangle(cornerRadius: 8))
+        .foregroundStyle(.white)
+        .themedSurface()
     }
 }

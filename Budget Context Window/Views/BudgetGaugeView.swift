@@ -8,32 +8,97 @@ struct BudgetGaugeView: View {
     }
 
     var body: some View {
-        VStack(spacing: 18) {
+        VStack(spacing: 20) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(summary.monthLabel)
+                        .font(.subheadline)
+                        .foregroundStyle(AppTheme.mutedText)
+
+                    Text("Budget Window")
+                        .font(.title2.bold())
+                        .foregroundStyle(.white)
+
+                    Text(statusText)
+                        .font(.caption.bold())
+                        .foregroundStyle(statusColor)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(statusColor.opacity(0.15), in: Capsule())
+                }
+
+                Spacer()
+
+                Text(percentText)
+                    .font(.title3.bold())
+                    .monospacedDigit()
+                    .foregroundStyle(statusColor)
+            }
+
             BudgetProgressRingView(
                 percentUsed: summary.percentUsed,
                 percentText: percentText,
-                size: 230,
-                lineWidth: 22,
-                textSize: 62
+                size: 218,
+                lineWidth: 20,
+                textSize: 60
             )
 
-            VStack(spacing: 6) {
-                Text(summary.monthLabel)
-                    .font(.headline)
+            HStack(spacing: 10) {
+                BudgetMetricTile(
+                    title: "Remaining",
+                    value: CurrencyFormatter.dollarsText(for: summary.remainingCents),
+                    valueColor: summary.isOverBudget ? AppTheme.danger : .white
+                )
 
-                Text("\(CurrencyFormatter.dollarsText(for: summary.remainingCents)) remaining")
-                    .font(.title2.weight(.semibold))
-                    .foregroundStyle(summary.isOverBudget ? AppTheme.danger : .primary)
-                    .minimumScaleFactor(0.8)
-
-                Text("\(CurrencyFormatter.dollarsText(for: summary.usedCents)) used of \(CurrencyFormatter.dollarsText(for: summary.budgetCents))")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                BudgetMetricTile(
+                    title: "Used",
+                    value: CurrencyFormatter.dollarsText(for: summary.usedCents),
+                    valueColor: .white
+                )
             }
+
+            Text("\(CurrencyFormatter.dollarsText(for: summary.budgetCents)) monthly budget")
+                .font(.caption)
+                .foregroundStyle(AppTheme.mutedText)
         }
         .frame(maxWidth: .infinity)
-        .padding(24)
-        .background(.background, in: RoundedRectangle(cornerRadius: 8))
+        .padding(20)
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: AppTheme.sectionCornerRadius)
+                    .fill(AppTheme.dashboardSurface)
+
+                LinearGradient(
+                    colors: [
+                        AppTheme.accent.opacity(0.28),
+                        AppTheme.dashboardSurface.opacity(0.2),
+                        AppTheme.dashboardSurface
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .clipShape(RoundedRectangle(cornerRadius: AppTheme.sectionCornerRadius))
+            }
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: AppTheme.sectionCornerRadius)
+                .stroke(AppTheme.accent.opacity(0.24), lineWidth: 1)
+        }
+    }
+
+    private var statusText: String {
+        switch summary.usageLevel {
+        case .green:
+            "In Control"
+        case .yellow:
+            "Watch Zone"
+        case .red:
+            summary.isOverBudget ? "Over Budget" : "Limit Reached"
+        }
+    }
+
+    private var statusColor: Color {
+        AppTheme.color(for: summary.usageLevel)
     }
 }
 
@@ -47,5 +112,5 @@ struct BudgetGaugeView: View {
         )
     )
     .padding()
-    .background(Color(.systemGroupedBackground))
+    .background(AppTheme.dashboardBackground)
 }

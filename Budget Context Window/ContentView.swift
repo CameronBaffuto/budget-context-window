@@ -61,7 +61,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: 16) {
                     BudgetGaugeView(summary: summary)
 
                     BudgetBreakdownView(summary: summary)
@@ -84,7 +84,7 @@ struct ContentView: View {
                 }
                 .padding()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(AppTheme.dashboardBackground)
             .navigationTitle("Budget Window")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

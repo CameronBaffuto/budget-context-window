@@ -45,6 +45,9 @@ struct MonthlyExpenseListView: View {
 
                                     if !expense.categoryName.isEmpty {
                                         Text(expense.categoryName)
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 3)
+                                            .background(AppTheme.chipFill, in: Capsule())
                                     }
 
                                     if expense.importSource == AppleCardTransaction.importSource {
@@ -97,22 +100,22 @@ struct MonthlyExpenseListView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Manual Expenses")
                         .font(.headline)
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(.white)
 
                     Text("\(expenses.count) this month")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(AppTheme.mutedText)
                 }
 
                 Spacer()
 
                 Text(CurrencyFormatter.dollarsText(for: totalCents))
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(AppTheme.mutedText)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(.background, in: RoundedRectangle(cornerRadius: 8))
+        .foregroundStyle(.white)
+        .themedSurface()
     }
 }

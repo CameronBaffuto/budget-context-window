@@ -36,12 +36,12 @@ struct MonthHistoryDetailView: View {
                         }
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(24)
-                    .background(.background, in: RoundedRectangle(cornerRadius: 8))
+                    .themedSurface(padding: 24)
 
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Breakdown")
                             .font(.headline)
+                            .foregroundStyle(.white)
 
                         LabeledContent("Fixed costs", value: CurrencyFormatter.dollarsText(for: snapshot.fixedCostCents))
                         LabeledContent("Manual expenses", value: CurrencyFormatter.dollarsText(for: snapshot.manualExpenseCents))
@@ -49,8 +49,8 @@ struct MonthHistoryDetailView: View {
                         LabeledContent("Budget", value: CurrencyFormatter.dollarsText(for: snapshot.budgetCents))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(.background, in: RoundedRectangle(cornerRadius: 8))
+                    .foregroundStyle(.white)
+                    .themedSurface()
 
                     Text("Updated \(snapshot.updatedAt.formatted(date: .abbreviated, time: .shortened))")
                         .font(.caption)
@@ -58,7 +58,7 @@ struct MonthHistoryDetailView: View {
                 }
                 .padding()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(AppTheme.dashboardBackground)
             .navigationTitle(snapshot.monthLabel)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
