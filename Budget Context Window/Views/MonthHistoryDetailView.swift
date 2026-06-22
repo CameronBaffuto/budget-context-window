@@ -33,11 +33,11 @@ struct MonthHistoryDetailView: View {
                                 .font(.headline)
                                 .foregroundStyle(AppTheme.primaryText)
 
-                            Text("\(CurrencyFormatter.dollarsText(for: snapshot.remainingCents)) remaining")
+                            Text("\(CurrencyFormatter.dollarsText(for: snapshot.remainingCents)) spendable left")
                                 .font(.title2.weight(.semibold))
                                 .foregroundStyle(snapshot.remainingCents < 0 ? AppTheme.danger : AppTheme.primaryText)
 
-                            Text("\(CurrencyFormatter.dollarsText(for: snapshot.usedCents)) used of \(CurrencyFormatter.dollarsText(for: snapshot.budgetCents))")
+                            Text("\(CurrencyFormatter.dollarsText(for: snapshot.usedCents)) manual used of \(CurrencyFormatter.dollarsText(for: snapshot.spendableBudgetCents))")
                                 .font(.subheadline)
                                 .foregroundStyle(AppTheme.mutedText)
                         }
@@ -50,10 +50,12 @@ struct MonthHistoryDetailView: View {
                             .font(.headline)
                             .foregroundStyle(AppTheme.primaryText)
 
-                        LabeledContent("Fixed costs", value: CurrencyFormatter.dollarsText(for: snapshot.fixedCostCents))
+                        LabeledContent("Monthly budget", value: CurrencyFormatter.dollarsText(for: snapshot.budgetCents))
+                        LabeledContent("Fixed costs reserved", value: CurrencyFormatter.dollarsText(for: snapshot.fixedCostCents))
+                        LabeledContent("Spendable window", value: CurrencyFormatter.dollarsText(for: snapshot.spendableBudgetCents))
                         LabeledContent("Manual expenses", value: CurrencyFormatter.dollarsText(for: snapshot.manualExpenseCents))
-                        LabeledContent("Total used", value: CurrencyFormatter.dollarsText(for: snapshot.usedCents))
-                        LabeledContent("Budget", value: CurrencyFormatter.dollarsText(for: snapshot.budgetCents))
+                        LabeledContent("Total committed", value: CurrencyFormatter.dollarsText(for: snapshot.totalCommittedCents))
+                        LabeledContent("Full budget used", value: snapshot.totalBudgetPercentUsed.formatted(.percent.precision(.fractionLength(0))))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .foregroundStyle(AppTheme.primaryText)

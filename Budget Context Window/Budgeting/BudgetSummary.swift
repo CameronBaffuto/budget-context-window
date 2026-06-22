@@ -21,6 +21,22 @@ struct BudgetSummary: Equatable {
     var usageLevel: BudgetUsageLevel {
         BudgetUsageLevel(percentUsed: percentUsed)
     }
+
+    var spendableBudgetCents: Int {
+        budgetCents - fixedCostCents
+    }
+
+    var totalCommittedCents: Int {
+        fixedCostCents + manualExpenseCents
+    }
+
+    var totalBudgetRemainingCents: Int {
+        budgetCents - totalCommittedCents
+    }
+
+    var totalBudgetPercentUsed: Double {
+        budgetCents > 0 ? Double(totalCommittedCents) / Double(budgetCents) : 0
+    }
 }
 
 enum BudgetUsageLevel {
@@ -47,9 +63,17 @@ enum BudgetCalculator {
         monthLabel: String,
         monthKey: String = ""
     ) -> BudgetSummary {
-        let usedCents = fixedCostCents + manualExpenseCents
-        let remainingCents = budgetCents - usedCents
-        let percentUsed = budgetCents > 0 ? Double(usedCents) / Double(budgetCents) : 0
+        let spendableBudgetCents = budgetCents - fixedCostCents
+        let usedCents = manualExpenseCents
+        let remainingCents = spendableBudgetCents - usedCents
+        let percentUsed: Double
+        if spendableBudgetCents > 0 {
+            percentUsed = Double(usedCents) / Double(spendableBudgetCents)
+        } else if budgetCents > 0 && fixedCostCents >= budgetCents {
+            percentUsed = 1
+        } else {
+            percentUsed = 0
+        }
 
         return BudgetSummary(
             monthKey: monthKey,

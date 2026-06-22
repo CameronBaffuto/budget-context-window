@@ -54,6 +54,22 @@ final class BudgetMonthSnapshot {
         BudgetUsageLevel(percentUsed: percentUsed)
     }
 
+    var spendableBudgetCents: Int {
+        budgetCents - fixedCostCents
+    }
+
+    var totalCommittedCents: Int {
+        fixedCostCents + manualExpenseCents
+    }
+
+    var totalBudgetRemainingCents: Int {
+        budgetCents - totalCommittedCents
+    }
+
+    var totalBudgetPercentUsed: Double {
+        budgetCents > 0 ? Double(totalCommittedCents) / Double(budgetCents) : 0
+    }
+
     var stableMonthKey: String {
         monthKey.isEmpty ? BudgetPeriod.monthKey(for: monthStart) : monthKey
     }

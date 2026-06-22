@@ -38,7 +38,7 @@ struct BudgetProgressRingView: View {
         }
         .frame(width: size, height: size)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Budget used")
+        .accessibilityLabel("Spendable window used")
         .accessibilityValue(percentText)
     }
 }

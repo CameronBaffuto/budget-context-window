@@ -22,10 +22,10 @@ struct BudgetWidgetSnapshot {
     }
 
     static let placeholder = BudgetWidgetSnapshot(
-        budgetCents: 500_000,
-        usedCents: 495_000,
-        remainingCents: 5_000,
-        percentUsed: 0.99,
+        budgetCents: 200_000,
+        usedCents: 50_000,
+        remainingCents: 150_000,
+        percentUsed: 0.25,
         monthLabel: "June 2026",
         updatedAt: .now
     )
@@ -80,7 +80,7 @@ struct Budget_Context_WindowWidget: Widget {
             BudgetWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Budget Window")
-        .description("Track the current month budget context.")
+        .description("Track the current month spendable window.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular])
     }
 }
@@ -140,7 +140,7 @@ struct BudgetWidgetEntryView: View {
                     .foregroundStyle(entry.snapshot.isOverBudget ? WidgetTheme.danger : .primary)
                     .minimumScaleFactor(0.75)
 
-                Text("remaining")
+                Text("spendable left")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -163,12 +163,12 @@ struct BudgetWidgetEntryView: View {
                 Text(entry.snapshot.monthLabel)
                     .font(.headline)
 
-                Text("\(currencyText(for: entry.snapshot.remainingCents)) remaining")
+                Text("\(currencyText(for: entry.snapshot.remainingCents)) spendable left")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(entry.snapshot.isOverBudget ? WidgetTheme.danger : .primary)
                     .minimumScaleFactor(0.75)
 
-                Text("\(currencyText(for: entry.snapshot.usedCents)) used of \(currencyText(for: entry.snapshot.budgetCents))")
+                Text("\(currencyText(for: entry.snapshot.usedCents)) manual used of \(currencyText(for: entry.snapshot.budgetCents))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
@@ -233,7 +233,7 @@ private struct WidgetProgressRingView: View {
         }
         .frame(width: size, height: size)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Budget used")
+        .accessibilityLabel("Spendable window used")
         .accessibilityValue(percentText)
     }
 }

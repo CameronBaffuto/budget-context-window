@@ -36,7 +36,7 @@ struct MonthHistoryListView: View {
                                     .font(.body.weight(.medium))
                                     .foregroundStyle(AppTheme.primaryText)
 
-                                Text("\(CurrencyFormatter.dollarsText(for: snapshot.usedCents)) used")
+                                Text("\(CurrencyFormatter.dollarsText(for: snapshot.usedCents)) manual used")
                                     .font(.caption)
                                     .foregroundStyle(AppTheme.mutedText)
                             }

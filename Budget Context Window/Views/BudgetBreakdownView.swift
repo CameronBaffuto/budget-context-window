@@ -9,9 +9,12 @@ struct BudgetBreakdownView: View {
                 .font(.headline)
                 .foregroundStyle(AppTheme.primaryText)
 
-            LabeledContent("Fixed costs", value: CurrencyFormatter.dollarsText(for: summary.fixedCostCents))
+            LabeledContent("Monthly budget", value: CurrencyFormatter.dollarsText(for: summary.budgetCents))
+            LabeledContent("Fixed costs reserved", value: CurrencyFormatter.dollarsText(for: summary.fixedCostCents))
+            LabeledContent("Spendable window", value: CurrencyFormatter.dollarsText(for: summary.spendableBudgetCents))
             LabeledContent("Manual expenses", value: CurrencyFormatter.dollarsText(for: summary.manualExpenseCents))
-            LabeledContent("Total used", value: CurrencyFormatter.dollarsText(for: summary.usedCents))
+            LabeledContent("Total committed", value: CurrencyFormatter.dollarsText(for: summary.totalCommittedCents))
+            LabeledContent("Full budget used", value: summary.totalBudgetPercentUsed.formatted(.percent.precision(.fractionLength(0))))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .foregroundStyle(AppTheme.primaryText)

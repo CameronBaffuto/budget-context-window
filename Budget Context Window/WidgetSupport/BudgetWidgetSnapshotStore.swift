@@ -18,7 +18,7 @@ enum BudgetWidgetSnapshotStore {
             return
         }
 
-        defaults.set(summary.budgetCents, forKey: Key.budgetCents)
+        defaults.set(summary.spendableBudgetCents, forKey: Key.budgetCents)
         defaults.set(summary.usedCents, forKey: Key.usedCents)
         defaults.set(summary.remainingCents, forKey: Key.remainingCents)
         defaults.set(summary.percentUsed, forKey: Key.percentUsed)

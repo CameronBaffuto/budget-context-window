@@ -15,6 +15,10 @@ struct BudgetGaugeView: View {
                         .font(.subheadline)
                         .foregroundStyle(AppTheme.mutedText)
 
+                    Text("Spendable Window")
+                        .font(.title2.bold())
+                        .foregroundStyle(AppTheme.primaryText)
+
                     Text(statusText)
                         .font(.caption.bold())
                         .foregroundStyle(statusColor)
@@ -41,19 +45,19 @@ struct BudgetGaugeView: View {
 
             HStack(spacing: 10) {
                 BudgetMetricTile(
-                    title: "Remaining",
+                    title: "Spendable left",
                     value: CurrencyFormatter.dollarsText(for: summary.remainingCents),
                     valueColor: summary.isOverBudget ? AppTheme.danger : AppTheme.primaryText
                 )
 
                 BudgetMetricTile(
-                    title: "Used",
+                    title: "Manual used",
                     value: CurrencyFormatter.dollarsText(for: summary.usedCents),
                     valueColor: AppTheme.primaryText
                 )
             }
 
-            Text("\(CurrencyFormatter.dollarsText(for: summary.budgetCents)) monthly budget")
+            Text("\(CurrencyFormatter.dollarsText(for: summary.spendableBudgetCents)) after fixed costs")
                 .font(.caption)
                 .foregroundStyle(AppTheme.mutedText)
         }
@@ -89,7 +93,7 @@ struct BudgetGaugeView: View {
         case .yellow:
             "Watch Zone"
         case .red:
-            summary.isOverBudget ? "Over Budget" : "Limit Reached"
+            summary.isOverBudget ? "Over Spendable" : "Limit Reached"
         }
     }
 

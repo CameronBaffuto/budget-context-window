@@ -5,18 +5,21 @@ import Testing
 
 @Suite("Budget calculation")
 struct BudgetCalculatorTests {
-    @Test("Combines fixed and manual spending")
-    func combinesFixedAndManualSpending() {
+    @Test("Tracks manual spending against spendable budget")
+    func tracksManualSpendingAgainstSpendableBudget() {
         let summary = BudgetCalculator.summary(
             budgetCents: 500_000,
-            fixedCostCents: 275_000,
+            fixedCostCents: 300_000,
             manualExpenseCents: 50_000,
             monthLabel: "June 2026"
         )
 
-        #expect(summary.usedCents == 325_000)
-        #expect(summary.remainingCents == 175_000)
-        #expect(summary.percentUsed == 0.65)
+        #expect(summary.spendableBudgetCents == 200_000)
+        #expect(summary.usedCents == 50_000)
+        #expect(summary.remainingCents == 150_000)
+        #expect(summary.percentUsed == 0.25)
+        #expect(summary.totalCommittedCents == 350_000)
+        #expect(summary.totalBudgetPercentUsed == 0.7)
         #expect(summary.isOverBudget == false)
     }
 
@@ -47,8 +50,10 @@ struct BudgetCalculatorTests {
         #expect(summary.monthKey == "2026-06")
         #expect(summary.fixedCostCents == 200_000)
         #expect(summary.manualExpenseCents == 10_000)
-        #expect(summary.usedCents == 210_000)
+        #expect(summary.spendableBudgetCents == 300_000)
+        #expect(summary.usedCents == 10_000)
         #expect(summary.remainingCents == 290_000)
+        #expect(summary.totalCommittedCents == 210_000)
     }
 
     @Test("Migrates original SwiftData store to current schema")
@@ -174,10 +179,12 @@ struct BudgetCalculatorTests {
             monthLabel: "June 2026"
         )
 
-        #expect(summary.usedCents == 125_000)
+        #expect(summary.spendableBudgetCents == 25_000)
+        #expect(summary.usedCents == 50_000)
         #expect(summary.remainingCents == -25_000)
-        #expect(summary.percentUsed == 1.25)
+        #expect(summary.percentUsed == 2)
         #expect(summary.displayProgress == 1)
+        #expect(summary.totalCommittedCents == 125_000)
         #expect(summary.isOverBudget)
     }
 
