@@ -34,7 +34,7 @@ struct ExpenseEditorView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Expense") {
+                Section {
                     TextField("Name", text: $name)
                         .textInputAutocapitalization(.words)
 
@@ -42,10 +42,8 @@ struct ExpenseEditorView: View {
                         .keyboardType(.decimalPad)
 
                     DatePicker("Date", selection: $date, displayedComponents: .date)
-                }
 
-                Section("Category") {
-                    TextField("Optional", text: $categoryName)
+                    TextField("Category (Optional)", text: $categoryName)
                         .textInputAutocapitalization(.words)
 
                     if !categorySuggestions.isEmpty {
@@ -61,16 +59,17 @@ struct ExpenseEditorView: View {
                             }
                         }
                     }
+                } header: {
+                    Text("Manual Expense")
+                } footer: {
+                    Text("Category is optional. Use it to group spending for category budgets and insights.")
                 }
 
-                if expense == nil, let onUploadCSV {
+                if expense == nil, onUploadCSV != nil {
                     Section {
-                        Button {
-                            dismiss()
-                            onUploadCSV()
-                        } label: {
-                            Label("Upload CSV", systemImage: "square.and.arrow.down")
-                        }
+                        Button("Upload CSV", systemImage: "square.and.arrow.down", action: uploadCSV)
+                    } header: {
+                        Text("Import Multiple Expenses")
                     } footer: {
                         Text("Import a CSV with Date or Transaction Date, Merchant, and Amount columns. Category and Type are optional when available.")
                     }
@@ -96,6 +95,11 @@ struct ExpenseEditorView: View {
                 Text("Enter a name and an amount greater than zero.")
             }
         }
+    }
+
+    private func uploadCSV() {
+        dismiss()
+        onUploadCSV?()
     }
 
     private var categorySuggestions: [String] {
