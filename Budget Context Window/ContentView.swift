@@ -61,7 +61,13 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Budget Window")
+                        .font(.largeTitle.weight(.bold))
+                        .foregroundStyle(AppTheme.primaryText)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityAddTraits(.isHeader)
+
                     BudgetGaugeView(summary: summary)
 
                     BudgetBreakdownView(summary: summary)
@@ -85,14 +91,15 @@ struct ContentView: View {
                 .padding()
             }
             .background(AppTheme.dashboardBackground)
-            .navigationTitle("Budget Window")
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
                         presentedSheet = .settings
                     } label: {
                         Label("Settings", systemImage: "gear")
-                            .foregroundStyle(.white)
+                            .foregroundStyle(AppTheme.primaryText)
                     }
                 }
 
@@ -104,10 +111,10 @@ struct ContentView: View {
                             ThemedMenuActionLabel(
                                 title: "Add Expense",
                                 systemImage: "plus",
-                                color: .white
+                                color: AppTheme.primaryText
                             )
                         }
-                        .tint(.white)
+                        .tint(AppTheme.primaryText)
 
                         Button {
                             isShowingAppleCardImporter = true
@@ -115,14 +122,14 @@ struct ContentView: View {
                             ThemedMenuActionLabel(
                                 title: "Import Apple Card CSV",
                                 systemImage: "square.and.arrow.down",
-                                color: .white
+                                color: AppTheme.primaryText
                             )
                         }
-                        .tint(.white)
+                        .tint(AppTheme.primaryText)
                     } label: {
                         Image(systemName: "plus")
                             .imageScale(.large)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(AppTheme.primaryText)
                     }
                     .accessibilityLabel("Add or import expenses")
                 }

@@ -15,10 +15,6 @@ struct BudgetGaugeView: View {
                         .font(.subheadline)
                         .foregroundStyle(AppTheme.mutedText)
 
-                    Text("Budget Window")
-                        .font(.title2.bold())
-                        .foregroundStyle(.white)
-
                     Text(statusText)
                         .font(.caption.bold())
                         .foregroundStyle(statusColor)
@@ -47,13 +43,13 @@ struct BudgetGaugeView: View {
                 BudgetMetricTile(
                     title: "Remaining",
                     value: CurrencyFormatter.dollarsText(for: summary.remainingCents),
-                    valueColor: summary.isOverBudget ? AppTheme.danger : .white
+                    valueColor: summary.isOverBudget ? AppTheme.danger : AppTheme.primaryText
                 )
 
                 BudgetMetricTile(
                     title: "Used",
                     value: CurrencyFormatter.dollarsText(for: summary.usedCents),
-                    valueColor: .white
+                    valueColor: AppTheme.primaryText
                 )
             }
 

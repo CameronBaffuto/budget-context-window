@@ -60,7 +60,7 @@ struct FixedCostsSummaryView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Fixed Costs")
                         .font(.headline)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(AppTheme.primaryText)
 
                     Text("\(enabledFixedCosts.count) recurring")
                         .font(.caption)
@@ -75,7 +75,7 @@ struct FixedCostsSummaryView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .foregroundStyle(.white)
+        .foregroundStyle(AppTheme.primaryText)
         .themedSurface()
     }
 }

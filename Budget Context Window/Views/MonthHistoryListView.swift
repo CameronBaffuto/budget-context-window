@@ -8,7 +8,7 @@ struct MonthHistoryListView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Monthly History")
                 .font(.headline)
-                .foregroundStyle(.white)
+                .foregroundStyle(AppTheme.primaryText)
 
             if snapshots.isEmpty {
                 ContentUnavailableView(
@@ -34,11 +34,11 @@ struct MonthHistoryListView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(snapshot.monthLabel)
                                     .font(.body.weight(.medium))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(AppTheme.primaryText)
 
                                 Text("\(CurrencyFormatter.dollarsText(for: snapshot.usedCents)) used")
                                     .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(AppTheme.mutedText)
                             }
 
                             Spacer()
@@ -50,12 +50,12 @@ struct MonthHistoryListView: View {
 
                                 Text(CurrencyFormatter.dollarsText(for: snapshot.remainingCents))
                                     .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(AppTheme.mutedText)
                             }
 
                             Image(systemName: "chevron.right")
                                 .font(.caption.weight(.semibold))
-                                .foregroundStyle(.tertiary)
+                                .foregroundStyle(AppTheme.mutedText)
                         }
                         .contentShape(.rect)
                     }

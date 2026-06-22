@@ -71,10 +71,10 @@ struct MonthlyExpenseListView: View {
                                     ThemedMenuActionLabel(
                                         title: "Edit",
                                         systemImage: "pencil",
-                                        color: .white
+                                        color: AppTheme.primaryText
                                     )
                                 }
-                                .tint(.white)
+                                .tint(AppTheme.primaryText)
 
                                 Button(role: .destructive) {
                                     onDelete(expense)
@@ -109,7 +109,7 @@ struct MonthlyExpenseListView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Manual Expenses")
                         .font(.headline)
-                        .foregroundStyle(.white)
+                        .foregroundStyle(AppTheme.primaryText)
 
                     Text("\(expenses.count) this month")
                         .font(.caption)
@@ -124,7 +124,7 @@ struct MonthlyExpenseListView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .foregroundStyle(.white)
+        .foregroundStyle(AppTheme.primaryText)
         .themedSurface()
     }
 }

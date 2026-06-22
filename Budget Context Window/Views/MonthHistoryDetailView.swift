@@ -12,7 +12,13 @@ struct MonthHistoryDetailView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(alignment: .leading, spacing: 24) {
+                    Text(snapshot.monthLabel)
+                        .font(.largeTitle.weight(.bold))
+                        .foregroundStyle(AppTheme.primaryText)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityAddTraits(.isHeader)
+
                     VStack(spacing: 18) {
                         BudgetProgressRingView(
                             percentUsed: snapshot.percentUsed,
@@ -25,14 +31,15 @@ struct MonthHistoryDetailView: View {
                         VStack(spacing: 6) {
                             Text(snapshot.monthLabel)
                                 .font(.headline)
+                                .foregroundStyle(AppTheme.primaryText)
 
                             Text("\(CurrencyFormatter.dollarsText(for: snapshot.remainingCents)) remaining")
                                 .font(.title2.weight(.semibold))
-                                .foregroundStyle(snapshot.remainingCents < 0 ? AppTheme.danger : .primary)
+                                .foregroundStyle(snapshot.remainingCents < 0 ? AppTheme.danger : AppTheme.primaryText)
 
                             Text("\(CurrencyFormatter.dollarsText(for: snapshot.usedCents)) used of \(CurrencyFormatter.dollarsText(for: snapshot.budgetCents))")
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(AppTheme.mutedText)
                         }
                     }
                     .frame(maxWidth: .infinity)
@@ -41,7 +48,7 @@ struct MonthHistoryDetailView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Breakdown")
                             .font(.headline)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(AppTheme.primaryText)
 
                         LabeledContent("Fixed costs", value: CurrencyFormatter.dollarsText(for: snapshot.fixedCostCents))
                         LabeledContent("Manual expenses", value: CurrencyFormatter.dollarsText(for: snapshot.manualExpenseCents))
@@ -49,17 +56,18 @@ struct MonthHistoryDetailView: View {
                         LabeledContent("Budget", value: CurrencyFormatter.dollarsText(for: snapshot.budgetCents))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(AppTheme.primaryText)
                     .themedSurface()
 
                     Text("Updated \(snapshot.updatedAt.formatted(date: .abbreviated, time: .shortened))")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(AppTheme.mutedText)
                 }
                 .padding()
             }
             .background(AppTheme.dashboardBackground)
-            .navigationTitle(snapshot.monthLabel)
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
