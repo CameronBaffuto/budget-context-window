@@ -43,14 +43,24 @@ struct CategorySettingsView: View {
                             Button {
                                 selectedCategory = category
                             } label: {
-                                Label("Edit", systemImage: "pencil")
+                                ThemedMenuActionLabel(
+                                    title: "Edit",
+                                    systemImage: "pencil",
+                                    color: AppTheme.accent
+                                )
                             }
+                            .tint(AppTheme.accent)
 
                             Button(role: .destructive) {
                                 deleteCategory(category)
                             } label: {
-                                Label("Delete", systemImage: "trash")
+                                ThemedMenuActionLabel(
+                                    title: "Delete",
+                                    systemImage: "trash",
+                                    color: AppTheme.danger
+                                )
                             }
+                            .tint(AppTheme.danger)
                         } label: {
                             Image(systemName: "ellipsis.circle")
                                 .imageScale(.large)
@@ -58,7 +68,6 @@ struct CategorySettingsView: View {
                                 .frame(width: 34, height: 34)
                                 .contentShape(.rect)
                         }
-                        .tint(.primary)
                         .buttonStyle(.plain)
                         .accessibilityLabel("Category actions for \(category.name)")
                     }

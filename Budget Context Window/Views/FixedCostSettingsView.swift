@@ -61,23 +61,35 @@ struct FixedCostSettingsView: View {
                             Button {
                                 selectedFixedCost = fixedCost
                             } label: {
-                                Label("Edit", systemImage: "pencil")
+                                ThemedMenuActionLabel(
+                                    title: "Edit",
+                                    systemImage: "pencil",
+                                    color: AppTheme.accent
+                                )
                             }
+                            .tint(AppTheme.accent)
 
                             Button {
                                 toggleFixedCost(fixedCost)
                             } label: {
-                                Label(
-                                    fixedCost.isEnabled ? "Disable" : "Enable",
-                                    systemImage: fixedCost.isEnabled ? "pause.circle" : "checkmark.circle"
+                                ThemedMenuActionLabel(
+                                    title: fixedCost.isEnabled ? "Disable" : "Enable",
+                                    systemImage: fixedCost.isEnabled ? "pause.circle" : "checkmark.circle",
+                                    color: AppTheme.accent
                                 )
                             }
+                            .tint(AppTheme.accent)
 
                             Button(role: .destructive) {
                                 deleteFixedCost(fixedCost)
                             } label: {
-                                Label("Delete", systemImage: "trash")
+                                ThemedMenuActionLabel(
+                                    title: "Delete",
+                                    systemImage: "trash",
+                                    color: AppTheme.danger
+                                )
                             }
+                            .tint(AppTheme.danger)
                         } label: {
                             Image(systemName: "ellipsis.circle")
                                 .imageScale(.large)
@@ -85,7 +97,6 @@ struct FixedCostSettingsView: View {
                                 .frame(width: 34, height: 34)
                                 .contentShape(.rect)
                         }
-                        .tint(.primary)
                         .buttonStyle(.plain)
                         .accessibilityLabel("Fixed cost actions for \(fixedCost.name)")
                     }

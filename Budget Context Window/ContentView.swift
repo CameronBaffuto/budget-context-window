@@ -88,23 +88,41 @@ struct ContentView: View {
             .navigationTitle("Budget Window")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Settings", systemImage: "gear") {
+                    Button {
                         presentedSheet = .settings
+                    } label: {
+                        Label("Settings", systemImage: "gear")
+                            .foregroundStyle(AppTheme.accent)
                     }
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
-                        Button("Add Expense", systemImage: "plus") {
+                        Button {
                             presentedSheet = .addExpense(activeWindowID)
+                        } label: {
+                            ThemedMenuActionLabel(
+                                title: "Add Expense",
+                                systemImage: "plus",
+                                color: AppTheme.accent
+                            )
                         }
+                        .tint(AppTheme.accent)
 
-                        Button("Import Apple Card CSV", systemImage: "square.and.arrow.down") {
+                        Button {
                             isShowingAppleCardImporter = true
+                        } label: {
+                            ThemedMenuActionLabel(
+                                title: "Import Apple Card CSV",
+                                systemImage: "square.and.arrow.down",
+                                color: AppTheme.accent
+                            )
                         }
+                        .tint(AppTheme.accent)
                     } label: {
                         Image(systemName: "plus")
                             .imageScale(.large)
+                            .foregroundStyle(AppTheme.accent)
                     }
                     .accessibilityLabel("Add or import expenses")
                 }
