@@ -92,7 +92,7 @@ struct ContentView: View {
                         presentedSheet = .settings
                     } label: {
                         Label("Settings", systemImage: "gear")
-                            .foregroundStyle(AppTheme.accent)
+                            .foregroundStyle(.white)
                     }
                 }
 
@@ -104,10 +104,10 @@ struct ContentView: View {
                             ThemedMenuActionLabel(
                                 title: "Add Expense",
                                 systemImage: "plus",
-                                color: AppTheme.accent
+                                color: .white
                             )
                         }
-                        .tint(AppTheme.accent)
+                        .tint(.white)
 
                         Button {
                             isShowingAppleCardImporter = true
@@ -115,14 +115,14 @@ struct ContentView: View {
                             ThemedMenuActionLabel(
                                 title: "Import Apple Card CSV",
                                 systemImage: "square.and.arrow.down",
-                                color: AppTheme.accent
+                                color: .white
                             )
                         }
-                        .tint(AppTheme.accent)
+                        .tint(.white)
                     } label: {
                         Image(systemName: "plus")
                             .imageScale(.large)
-                            .foregroundStyle(AppTheme.accent)
+                            .foregroundStyle(.white)
                     }
                     .accessibilityLabel("Add or import expenses")
                 }
@@ -167,7 +167,6 @@ struct ContentView: View {
                 BudgetWidgetSnapshotStore.write(newSummary)
             }
         }
-        .tint(AppTheme.accent)
     }
 
     private func ensureSettings() {

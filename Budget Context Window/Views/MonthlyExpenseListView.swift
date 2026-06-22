@@ -71,10 +71,10 @@ struct MonthlyExpenseListView: View {
                                     ThemedMenuActionLabel(
                                         title: "Edit",
                                         systemImage: "pencil",
-                                        color: AppTheme.accent
+                                        color: .white
                                     )
                                 }
-                                .tint(AppTheme.accent)
+                                .tint(.white)
 
                                 Button(role: .destructive) {
                                     onDelete(expense)

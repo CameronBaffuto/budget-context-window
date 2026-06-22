@@ -132,7 +132,7 @@ private struct SettingsRowView: View {
             }
         } icon: {
             Image(systemName: systemImage)
-                .foregroundStyle(AppTheme.accent)
+                .foregroundStyle(.primary)
         }
     }
 }

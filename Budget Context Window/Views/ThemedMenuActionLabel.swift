@@ -10,6 +10,7 @@ struct ThemedMenuActionLabel: View {
             Text(title)
         } icon: {
             Image(systemName: systemImage)
+                .symbolRenderingMode(.monochrome)
         }
         .foregroundStyle(color)
     }

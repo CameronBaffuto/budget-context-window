@@ -64,10 +64,10 @@ struct FixedCostSettingsView: View {
                                 ThemedMenuActionLabel(
                                     title: "Edit",
                                     systemImage: "pencil",
-                                    color: AppTheme.accent
+                                    color: .white
                                 )
                             }
-                            .tint(AppTheme.accent)
+                            .tint(.white)
 
                             Button {
                                 toggleFixedCost(fixedCost)
@@ -75,10 +75,10 @@ struct FixedCostSettingsView: View {
                                 ThemedMenuActionLabel(
                                     title: fixedCost.isEnabled ? "Disable" : "Enable",
                                     systemImage: fixedCost.isEnabled ? "pause.circle" : "checkmark.circle",
-                                    color: AppTheme.accent
+                                    color: .white
                                 )
                             }
-                            .tint(AppTheme.accent)
+                            .tint(.white)
 
                             Button(role: .destructive) {
                                 deleteFixedCost(fixedCost)
@@ -108,7 +108,7 @@ struct FixedCostSettingsView: View {
                         Button(fixedCost.isEnabled ? "Disable" : "Enable", systemImage: fixedCost.isEnabled ? "pause.circle" : "checkmark.circle") {
                             toggleFixedCost(fixedCost)
                         }
-                        .tint(AppTheme.accent)
+                        .tint(.white)
                     }
                 }
             }
@@ -116,8 +116,11 @@ struct FixedCostSettingsView: View {
         .navigationTitle("Fixed Costs")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Add Fixed Cost", systemImage: "plus") {
+                Button {
                     isAddingFixedCost = true
+                } label: {
+                    Label("Add Fixed Cost", systemImage: "plus")
+                        .foregroundStyle(.white)
                 }
             }
         }

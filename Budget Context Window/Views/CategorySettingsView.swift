@@ -46,10 +46,10 @@ struct CategorySettingsView: View {
                                 ThemedMenuActionLabel(
                                     title: "Edit",
                                     systemImage: "pencil",
-                                    color: AppTheme.accent
+                                    color: .white
                                 )
                             }
-                            .tint(AppTheme.accent)
+                            .tint(.white)
 
                             Button(role: .destructive) {
                                 deleteCategory(category)
@@ -82,8 +82,11 @@ struct CategorySettingsView: View {
         .navigationTitle("Categories")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Add Category", systemImage: "plus") {
+                Button {
                     isAddingCategory = true
+                } label: {
+                    Label("Add Category", systemImage: "plus")
+                        .foregroundStyle(.white)
                 }
             }
         }
