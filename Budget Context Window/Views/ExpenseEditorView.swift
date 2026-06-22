@@ -15,10 +15,16 @@ struct ExpenseEditorView: View {
 
     private let expense: Expense?
     private let budgetWindowID: String
+    private let onUploadCSV: (() -> Void)?
 
-    init(expense: Expense? = nil, budgetWindowID: String = BudgetWindow.defaultWindowID) {
+    init(
+        expense: Expense? = nil,
+        budgetWindowID: String = BudgetWindow.defaultWindowID,
+        onUploadCSV: (() -> Void)? = nil
+    ) {
         self.expense = expense
         self.budgetWindowID = expense?.budgetWindowID ?? budgetWindowID
+        self.onUploadCSV = onUploadCSV
         _name = State(initialValue: expense?.name ?? "")
         _amountText = State(initialValue: expense.map { CurrencyFormatter.decimalText(for: $0.amountCents) } ?? "")
         _date = State(initialValue: expense?.date ?? .now)
@@ -54,6 +60,19 @@ struct ExpenseEditorView: View {
                                 }
                             }
                         }
+                    }
+                }
+
+                if expense == nil, let onUploadCSV {
+                    Section {
+                        Button {
+                            dismiss()
+                            onUploadCSV()
+                        } label: {
+                            Label("Upload CSV", systemImage: "square.and.arrow.down")
+                        }
+                    } footer: {
+                        Text("Import a CSV with Date or Transaction Date, Merchant, and Amount columns. Category and Type are optional when available.")
                     }
                 }
             }

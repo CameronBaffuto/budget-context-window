@@ -52,7 +52,7 @@ struct MonthlyExpenseListView: View {
 
                                     if expense.importSource == AppleCardTransaction.importSource {
                                         Image(systemName: "creditcard")
-                                            .accessibilityLabel("Imported from Apple Card")
+                                            .accessibilityLabel("Imported from CSV")
                                     }
                                 }
                                     .font(.caption)

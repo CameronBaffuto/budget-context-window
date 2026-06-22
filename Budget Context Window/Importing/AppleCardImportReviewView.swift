@@ -34,7 +34,7 @@ struct AppleCardImportReviewView: View {
                         ContentUnavailableView(
                             "No New Purchases",
                             systemImage: "checkmark.circle",
-                            description: Text("This file does not contain new Apple Card purchases.")
+                            description: Text("This file does not contain new CSV purchases.")
                         )
                     } else {
                         ForEach(draft.transactions) { transaction in

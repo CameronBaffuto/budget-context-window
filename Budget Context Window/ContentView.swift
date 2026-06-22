@@ -21,7 +21,7 @@ struct ContentView: View {
 
     @State private var presentedSheet: SheetDestination?
     @State private var importDraft: AppleCardImportDraft?
-    @State private var isShowingAppleCardImporter = false
+    @State private var isShowingCSVImporter = false
     @State private var showsImportError = false
     @State private var importErrorMessage = ""
 
@@ -104,40 +104,22 @@ struct ContentView: View {
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Button {
-                            presentedSheet = .addExpense(activeWindowID)
-                        } label: {
-                            ThemedMenuActionLabel(
-                                title: "Add Expense",
-                                systemImage: "plus",
-                                color: AppTheme.primaryText
-                            )
-                        }
-                        .tint(AppTheme.primaryText)
-
-                        Button {
-                            isShowingAppleCardImporter = true
-                        } label: {
-                            ThemedMenuActionLabel(
-                                title: "Import Apple Card CSV",
-                                systemImage: "square.and.arrow.down",
-                                color: AppTheme.primaryText
-                            )
-                        }
-                        .tint(AppTheme.primaryText)
+                    Button {
+                        presentedSheet = .addExpense(activeWindowID)
                     } label: {
-                        Image(systemName: "plus")
+                        Label("Add Expense", systemImage: "plus")
+                            .labelStyle(.iconOnly)
                             .imageScale(.large)
                             .foregroundStyle(AppTheme.primaryText)
                     }
-                    .accessibilityLabel("Add or import expenses")
                 }
             }
             .sheet(item: $presentedSheet) { sheet in
                 switch sheet {
                 case .addExpense(let budgetWindowID):
-                    ExpenseEditorView(budgetWindowID: budgetWindowID)
+                    ExpenseEditorView(budgetWindowID: budgetWindowID) {
+                        showCSVImporterAfterAddSheetDismisses()
+                    }
                 case .editExpense(let expense):
                     ExpenseEditorView(expense: expense)
                 case .settings:
@@ -152,10 +134,10 @@ struct ContentView: View {
                 }
             }
             .fileImporter(
-                isPresented: $isShowingAppleCardImporter,
+                isPresented: $isShowingCSVImporter,
                 allowedContentTypes: [.commaSeparatedText, .plainText],
                 allowsMultipleSelection: false,
-                onCompletion: handleAppleCardImport
+                onCompletion: handleCSVImport
             )
             .alert("Import Failed", isPresented: $showsImportError) {
                 Button("OK", role: .cancel) {}
@@ -211,7 +193,15 @@ struct ContentView: View {
         try? modelContext.save()
     }
 
-    private func handleAppleCardImport(_ result: Result<[URL], Error>) {
+    private func showCSVImporterAfterAddSheetDismisses() {
+        Task { @MainActor in
+            presentedSheet = nil
+            try? await Task.sleep(for: .milliseconds(250))
+            isShowingCSVImporter = true
+        }
+    }
+
+    private func handleCSVImport(_ result: Result<[URL], Error>) {
         do {
             guard let url = try result.get().first else {
                 return

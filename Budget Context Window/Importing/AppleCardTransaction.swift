@@ -14,7 +14,7 @@ struct AppleCardTransaction: Identifiable, Hashable {
     }
 
     var isExpensePurchase: Bool {
-        amountCents > 0 && type.localizedCaseInsensitiveCompare("Purchase") == .orderedSame
+        amountCents > 0 && (type.isEmpty || type.localizedCaseInsensitiveCompare("Purchase") == .orderedSame)
     }
 
     var importIdentifier: String {

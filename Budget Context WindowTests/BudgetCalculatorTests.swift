@@ -118,6 +118,22 @@ struct BudgetCalculatorTests {
         #expect(first.importIdentifier.contains(AppleCardTransaction.importSource))
     }
 
+    @Test("Parses generic CSV transactions")
+    func parsesGenericCSVTransactions() throws {
+        let csv = """
+        Date,Merchant,Amount
+        06/20/2026,Corner Market,23.10
+        """
+
+        let transaction = try #require(try AppleCardCSVImporter.transactions(fromCSVText: csv).first)
+
+        #expect(transaction.merchant == "Corner Market")
+        #expect(transaction.category.isEmpty)
+        #expect(transaction.type.isEmpty)
+        #expect(transaction.amountCents == 2_310)
+        #expect(transaction.isExpensePurchase)
+    }
+
     @Test("Builds category suggestions from settings categories")
     func buildsCategorySuggestions() {
         let suggestions = ExpenseCategoryCatalog.suggestions(

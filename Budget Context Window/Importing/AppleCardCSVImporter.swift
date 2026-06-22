@@ -14,7 +14,7 @@ enum AppleCardCSVImporter {
             case .missingColumns(let columns):
                 "The CSV is missing: \(columns.joined(separator: ", "))."
             case .invalidRows:
-                "No valid Apple Card transactions were found."
+                "No valid CSV transactions were found."
             }
         }
     }
@@ -37,25 +37,19 @@ enum AppleCardCSVImporter {
             (name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(), index)
         })
 
-        let requiredColumns = [
-            "transaction date",
-            "merchant",
-            "category",
-            "type",
-            "amount (usd)"
-        ]
-        let missingColumns = requiredColumns.filter { headerLookup[$0] == nil }
+        let columnLookup = CSVColumnLookup(headerLookup: headerLookup)
+        let missingColumns = columnLookup.missingRequiredColumns
         guard missingColumns.isEmpty else {
             throw ImportError.missingColumns(missingColumns)
         }
 
         let transactions = rows.dropFirst().compactMap { row -> AppleCardTransaction? in
-            guard let transactionDate = value("transaction date", in: row, lookup: headerLookup).flatMap(Self.date(from:)),
-                  let amountCents = value("amount (usd)", in: row, lookup: headerLookup).flatMap(CurrencyFormatter.cents(from:)) else {
+            guard let transactionDate = columnLookup.value(for: .date, in: row).flatMap(Self.date(from:)),
+                  let amountCents = columnLookup.value(for: .amount, in: row).flatMap(CurrencyFormatter.cents(from:)) else {
                 return nil
             }
 
-            let merchant = value("merchant", in: row, lookup: headerLookup)?.trimmedForImport ?? ""
+            let merchant = columnLookup.value(for: .merchant, in: row)?.trimmedForImport ?? ""
             guard !merchant.isEmpty else {
                 return nil
             }
@@ -63,8 +57,8 @@ enum AppleCardCSVImporter {
             return AppleCardTransaction(
                 transactionDate: transactionDate,
                 merchant: merchant,
-                category: value("category", in: row, lookup: headerLookup)?.trimmedForImport ?? "",
-                type: value("type", in: row, lookup: headerLookup)?.trimmedForImport ?? "",
+                category: columnLookup.value(for: .category, in: row)?.trimmedForImport ?? "",
+                type: columnLookup.value(for: .type, in: row)?.trimmedForImport ?? "",
                 amountCents: amountCents
             )
         }
@@ -75,15 +69,6 @@ enum AppleCardCSVImporter {
 
         return transactions
     }
-
-    private static func value(_ key: String, in row: [String], lookup: [String: Int]) -> String? {
-        guard let index = lookup[key], row.indices.contains(index) else {
-            return nil
-        }
-
-        return row[index]
-    }
-
     private static func date(from input: String) -> Date? {
         dateFormatter.date(from: input.trimmingCharacters(in: .whitespacesAndNewlines))
     }
@@ -95,6 +80,66 @@ enum AppleCardCSVImporter {
         formatter.dateFormat = "MM/dd/yyyy"
         return formatter
     }()
+}
+
+private struct CSVColumnLookup {
+    enum Field: CaseIterable {
+        case date
+        case merchant
+        case amount
+        case category
+        case type
+
+        var displayName: String {
+            switch self {
+            case .date:
+                "date"
+            case .merchant:
+                "merchant"
+            case .amount:
+                "amount"
+            case .category:
+                "category"
+            case .type:
+                "type"
+            }
+        }
+
+        var aliases: [String] {
+            switch self {
+            case .date:
+                ["transaction date", "date", "posted date"]
+            case .merchant:
+                ["merchant", "description", "name", "payee"]
+            case .amount:
+                ["amount (usd)", "amount", "amount usd"]
+            case .category:
+                ["category"]
+            case .type:
+                ["type"]
+            }
+        }
+    }
+
+    let headerLookup: [String: Int]
+
+    var missingRequiredColumns: [String] {
+        [Field.date, .merchant, .amount].compactMap { field in
+            index(for: field) == nil ? field.displayName : nil
+        }
+    }
+
+    func value(for field: Field, in row: [String]) -> String? {
+        guard let index = index(for: field), row.indices.contains(index) else {
+            return nil
+        }
+
+        return row[index]
+    }
+
+    private func index(for field: Field) -> Int? {
+        field.aliases.lazy.compactMap { headerLookup[$0] }.first
+    }
 }
 
 private enum CSVParser {
